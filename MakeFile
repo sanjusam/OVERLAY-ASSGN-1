@@ -1,0 +1,61 @@
+all: clean compile
+	@echo -e '[INFO] Done!'
+
+clean:
+	@echo -e '[INFO] Cleaning Up'
+	@rm  -rf ./cs455/overlay/utils/HelperUtils.class
+	@rm  -rf ./cs455/overlay/wireformats/AbstractEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/Default.class
+	@rm  -rf ./cs455/overlay/wireformats/RegisterRequest.class
+	@rm  -rf ./cs455/overlay/wireformats/LinkWeights.class
+	@rm  -rf ./cs455/overlay/wireformats/EventFactory.class
+	@rm  -rf ./cs455/overlay/wireformats/MessagingNodesList.class
+	@rm  -rf ./cs455/overlay/wireformats/DeregisterRequest.class
+	@rm  -rf ./cs455/overlay/wireformats/Event.class
+	@rm  -rf ./cs455/overlay/wireformats/RegisterAcknowledgement.class
+	@rm  -rf ./cs455/overlay/node/AbstractNode.class
+	@rm  -rf ./cs455/overlay/node/MessagingNode.class
+	@rm  -rf ./cs455/overlay/node/CommandListener.class
+	@rm  -rf ./cs455/overlay/node/Registry.class
+	@rm  -rf ./cs455/overlay/node/NodeConfiguration.class
+	@rm  -rf ./cs455/overlay/node/NodeDetails.class
+	@rm  -rf ./cs455/overlay/node/Node.class
+	@rm  -rf ./cs455/overlay/transport/TCPReceiverThread.class
+	@rm  -rf ./cs455/overlay/transport/TCPCommunicationHandler.class
+	@rm  -rf ./cs455/overlay/transport/TCPSender.class
+	@rm  -rf ./cs455/overlay/transport/ConnectionObserver.class
+	@rm  -rf ./cs455/overlay/transport/TCPServerThread.class
+	@rm  -rf ./cs455/overlay/transport/ConnectionObservable.class
+	@rm  -rf ./cs455/overlay/constants/EventConstants.class
+	@rm  -rf ./cs455/overlay/constants/EventType.class
+	@rm  -rf ./cs455/overlay/constants/MessageConstants.class
+
+compile:
+	@echo -e '[INFO] Compiling the Sources'
+	@javac -d . ./src/cs455/overlay/utils/HelperUtils.java
+	@javac -d . ./src/cs455/overlay/constants/EventConstants.java
+	@javac -d . ./src/cs455/overlay/constants/EventType.java
+	@javac -d . ./src/cs455/overlay/constants/MessageConstants.java
+	@javac -d . ./src/cs455/overlay/wireformats/Event.java
+	@javac -d . ./src/cs455/overlay/wireformats/AbstractEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/MessagingNodesList.java
+	@javac -d . ./src/cs455/overlay/wireformats/Default.java
+	@javac -d . ./src/cs455/overlay/wireformats/RegisterRequest.java
+	@javac -d . ./src/cs455/overlay/wireformats/DeregisterRequest.java
+	@javac -d . ./src/cs455/overlay/wireformats/LinkWeights.java
+	@javac -d . ./src/cs455/overlay/node/Node.java
+	@javac -d . ./src/cs455/overlay/wireformats/RegisterAcknowledgement.java
+	@javac -d . ./src/cs455/overlay/wireformats/EventFactory.java
+	@javac -d . ./src/cs455/overlay/transport/TCPSender.java
+	@javac -d . ./src/cs455/overlay/transport/TCPReceiverThread.java
+	@javac -d . ./src/cs455/overlay/transport/TCPCommunicationHandler.java
+	@javac -d . ./src/cs455/overlay/transport/ConnectionObserver.java
+	@javac -d . ./src/cs455/overlay/transport/ConnectionObservable.java
+	@javac -d . ./src/cs455/overlay/transport/TCPServerThread.java
+	@javac -d . ./src/cs455/overlay/node/NodeDetails.java
+	@javac -d . ./src/cs455/overlay/node/CommandListener.java
+	@javac -d . ./src/cs455/overlay/node/AbstractNode.java
+	@javac -d . ./src/cs455/overlay/node/Registry.java
+	@javac -d . ./src/cs455/overlay/node/MessagingNode.java
+	@javac -d . ./src/cs455/overlay/node/NodeConfiguration.java
+

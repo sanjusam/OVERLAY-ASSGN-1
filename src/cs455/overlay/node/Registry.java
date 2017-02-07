@@ -15,7 +15,9 @@ import cs455.overlay.wireformats.RegisterAcknowledgement;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Registry extends AbstractNode implements Node {
     final List<NodeDetails> nodeDetailsList = new ArrayList<>();
@@ -47,40 +49,55 @@ public class Registry extends AbstractNode implements Node {
     @Override
     public void setupOverlay(final int numConnections)throws IOException {
         if(nodeDetailsList.size() < numConnections) {
-            System.out.println("Unable to create over-lay : Num servers " + nodeDetailsList.size() + " Num Overlay requested " + numConnections );
+            System.out.println("Unable to create over-lay : Number of Messaging Nodes Registered " + nodeDetailsList.size() + " Num Overlay requested " + numConnections );
             return;
         }
-        NodeDetails nodeDetails = nodeDetailsList.get(0);
-        final MessagingNodesList messagingNodesList = buildOverlayNodes();
-        TCPCommunicationHandler communicationHandler = getConnectionFromPool(nodeDetails.getFormattedString());
-        if(communicationHandler == null) {
-            //TODO :: Create connection.
-            Socket socket= new Socket(nodeDetails.getNodeName(), nodeDetails.getPortNum());
-            communicationHandler = update(socket);
+        final Map<NodeDetails, MessagingNodesList>  allOverlays = buildOverlayNodes();
+        for(final NodeDetails nodeDetails : allOverlays.keySet()) {
+            final MessagingNodesList messagingNodesList = allOverlays.get(nodeDetails);
+            TCPCommunicationHandler communicationHandler = getConnectionFromPool(nodeDetails.getFormattedString());
+            if(communicationHandler == null) {
+                //TODO :: Create connection.
+                Socket socket= new Socket(nodeDetails.getNodeName(), nodeDetails.getPortNum());
+                communicationHandler = update(socket);
+                communicationHandler.sendData(messagingNodesList.getBytes());
+            }
         }
-
-        communicationHandler.sendData(messagingNodesList.getBytes());
 
     }
 
-    private MessagingNodesList buildOverlayNodes() {
+    private Map<NodeDetails, MessagingNodesList>  buildOverlayNodes() {
         //TODO : Connecting all nodes.
-        final MessagingNodesList overlayList = new MessagingNodesList(0);
-        if(nodeDetailsList.size() < 2) {
-            System.out.println("Not enough node to setup overlay");
-            return overlayList;
+        final Map<NodeDetails, MessagingNodesList> overLayList = new HashMap<>();
+        MessagingNodesList temp;
+        boolean allNodeListCreated = false;
+        for(final NodeDetails nodeDetails : nodeDetailsList) {
+            if(!allNodeListCreated) {
+                temp = buildOverlayForAllNodes(nodeDetails);
+                allNodeListCreated = true;
+                overLayList.put(nodeDetails, temp);
+            }
         }
-        boolean first = true;
-        for (NodeDetails nodeDetails : nodeDetailsList ) {
-            if(!first) {
+        return overLayList;
+    }
+
+
+    private MessagingNodesList buildOverlayForAllNodes(final NodeDetails sourceNode) {
+        final List<NodeDetails> tmpNodeDetailsList  = nodeDetailsList;
+        final MessagingNodesList overlayList = new MessagingNodesList(0);
+        for(final NodeDetails nodeDetails : tmpNodeDetailsList) {
+            if(!sourceNode.getFormattedString().equals(nodeDetails.getFormattedString())) {
                 overlayList.addNodesToList(nodeDetails.getFormattedString());
-            } else {
-                first = false;
+                nodeDetails.incrementConnections();
             }
         }
         return overlayList;
     }
 
+    private MessagingNodesList buildOverlayEachNodeNodes(final NodeDetails sourceNode, final int numConnections) {
+        //SANJU TODO :
+        return null;
+    }
     private void deRegisterNode(final DeregisterRequest deregisterRequest, final Socket socket) {
         /* Checks
            1. The requested IP, is the same as the source of the request.
