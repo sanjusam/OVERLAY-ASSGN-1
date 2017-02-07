@@ -2,6 +2,7 @@ package cs455.overlay.utils;
 
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.util.Random;
 
 public class HelperUtils {
     public static int getInt(final String stringToConvert) {
@@ -29,6 +30,11 @@ public class HelperUtils {
             return HelperUtils.getLocalHostIpAddress();
         }
         return hostName.replaceAll("/", "");
+    }
+
+    public static int generateRandomNumber(int min, int max) {
+        Random rand = new Random();
+        return rand.nextInt((max - min) + 1) + min;
     }
 
 }

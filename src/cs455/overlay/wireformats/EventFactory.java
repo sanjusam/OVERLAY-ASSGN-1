@@ -49,6 +49,9 @@ public class EventFactory {
         } else if (eventTypeReceived == EventType.DEREGISTER_REQUEST.getValue()) {
             System.out.println("Node-Deregister : Received De-register Acknowledgement Event");
             return new DeregisterRequest(incomingBytes);
+        } else if (eventTypeReceived == EventType.MESSAGING_NODES_LIST.getValue()) {
+            System.out.println("Messaging-Node : Received the list of nodes to be be connect");
+            return new MessagingNodesList(incomingBytes);
         } else {
             return new Default();  //TODO ::  Add all cases.
         }

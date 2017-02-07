@@ -39,4 +39,6 @@ public class MessagingNode extends AbstractNode {
         }
        System.out.println("Send registration request to the registry!");
     }
+
+
 }

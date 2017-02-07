@@ -8,7 +8,7 @@ public enum EventType {
     REGISTER_REQUEST(1,"register", "reg"),
     REGISTER_RESPONSE (2,"response","res"),
     DEREGISTER_REQUEST(3,"deregister", "dereg"),
-        MESSAGING_NODES_LIST(4,"setup-overlay", "setup-overlay"),
+    MESSAGING_NODES_LIST(4,"setup-overlay", "setup-overlay"),
     Link_Weights(5,"link-weights", "link-weights"),
     TASK_INITIATE(6, "task-initiate", "task-initiate");
 

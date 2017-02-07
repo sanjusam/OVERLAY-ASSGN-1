@@ -24,8 +24,10 @@ public class CommandListener implements Runnable {
             System.out.print(promptString);
             try {
                 command = bufferedReader.readLine();
+                if(command.trim().isEmpty()) {
+                    continue;
+                }
                 generateEventFromInput(command);
-
 //                node.processCommand(command);
             } catch (IOException e) {
                 e.printStackTrace();

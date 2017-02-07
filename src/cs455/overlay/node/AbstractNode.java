@@ -7,6 +7,7 @@ import cs455.overlay.utils.HelperUtils;
 import cs455.overlay.wireformats.Event;
 import cs455.overlay.constants.EventConstants;
 import cs455.overlay.constants.EventType;
+import cs455.overlay.wireformats.MessagingNodesList;
 import cs455.overlay.wireformats.RegisterAcknowledgement;
 
 import java.io.IOException;
@@ -59,7 +60,13 @@ public class AbstractNode implements Node, ConnectionObserver {
             System.out.println("Additional Information : " + ((RegisterAcknowledgement)event).getAdditionalInfo());
         } else if(eventTypeReceived == EventType.MESSAGING_NODES_LIST.getValue()) {
             System.out.println("Request to setup overlay received from Registry");
+
         }
+    }
+
+    private void makeConnectionsOnOverLayNodes(final MessagingNodesList nodesList) {
+        //TODO :: SANJU
+
     }
 
     @Override
