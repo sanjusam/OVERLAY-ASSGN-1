@@ -7,6 +7,10 @@ import java.net.Socket;
 
 public interface Node {
     void onEvent(final Event event, final Socket socket);  //TODO :: Argument event
-    void processCommand(final String command);
-    void setupOverlay(final int numConnections) throws IOException;
+    void processCommand(final String command);  // TODO::  Can be taken out
+    void setupOverlay(final String command) throws IOException;
+    void sendLinkWeight();
+    void processLinkWeights();
+    void listMessagingNodes();
+    void ListEdgeWeight();
 }

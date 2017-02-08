@@ -27,14 +27,15 @@ public class CommandListener implements Runnable {
                 if(command.trim().isEmpty()) {
                     continue;
                 }
-                generateEventFromInput(command);
-//                node.processCommand(command);
+//                generateEventFromInput(command);
+                node.processCommand(command);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
-    private void generateEventFromInput(final String command) {
+
+    /*private void generateEventFromInput(final String command) {
         final EventType eventType = EventType.getEventTypeFromCommand(command.split(" ")[0]);
         if(eventType == null) {
             System.out.println("Unknown command");
@@ -49,5 +50,5 @@ public class CommandListener implements Runnable {
             }
         }
 
-    }
+    } */
 }

@@ -1,5 +1,7 @@
 package cs455.overlay.wireformats;
 
+import cs455.overlay.constants.EventType;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -16,6 +18,7 @@ public class LinkWeights extends AbstractEvent {
     private List<String> linkWeightList = new ArrayList<>();  // hostnameA:portnumA hostnameB:portnumB weight
 
     public LinkWeights(final int numLinks) {
+        super(EventType.Link_Weights.getValue());
         this.numLinks = numLinks;
     }
 

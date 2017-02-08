@@ -9,8 +9,11 @@ public enum EventType {
     REGISTER_RESPONSE (2,"response","res"),
     DEREGISTER_REQUEST(3,"deregister", "dereg"),
     MESSAGING_NODES_LIST(4,"setup-overlay", "setup-overlay"),
-    Link_Weights(5,"link-weights", "link-weights"),
-    TASK_INITIATE(6, "task-initiate", "task-initiate");
+    Link_Weights(5,"link-weights", "weights"),
+    TASK_INITIATE(6, "task-initiate", "init"),
+    LIST_MSG_NODES(7, "list-messaging nodes", "ls node"),
+    LIST_WEIGHTS(8, "list-weights", "ls wt"),
+    SEND_LINK_WEIGHTS(9, "send-overlay-link-weights", "send wt");
 
     private final int value;
     private final String longCommand;
@@ -39,6 +42,8 @@ public enum EventType {
             final EventType eventType = commandMap.get(current);
             if(eventType.getLongCommand().toLowerCase().equals(command.toLowerCase()) ||
                     eventType.getShortCommand().toLowerCase().equals(command.toLowerCase()))  {
+                return eventType;
+            } else if (eventType.getLongCommand().toLowerCase().startsWith(command.toLowerCase())) {
                 return eventType;
             }
         }

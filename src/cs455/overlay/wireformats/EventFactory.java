@@ -50,9 +50,13 @@ public class EventFactory {
             System.out.println("Node-Deregister : Received De-register Acknowledgement Event");
             return new DeregisterRequest(incomingBytes);
         } else if (eventTypeReceived == EventType.MESSAGING_NODES_LIST.getValue()) {
-            System.out.println("Messaging-Node : Received the list of nodes to be be connect");
+            System.out.println("Messaging-Node : Received the list of nodes to be connect");
             return new MessagingNodesList(incomingBytes);
+        } else if (eventTypeReceived == EventType.Link_Weights.getValue()) {
+            System.out.println("Link Weights : Received Link weights.");
+            return new LinkWeights(incomingBytes);
         } else {
+            System.out.println("Message Received : Undefined - add proper handling ");
             return new Default();  //TODO ::  Add all cases.
         }
     }

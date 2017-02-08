@@ -2,7 +2,7 @@ all: clean compile
 	@echo -e '[INFO] Done!'
 
 clean:
-	@echo -e '[INFO] Cleaning Up'
+	@echo -e '[INFO] Cleaning up class files'
 	@rm  -rf ./cs455/overlay/utils/HelperUtils.class
 	@rm  -rf ./cs455/overlay/wireformats/AbstractEvent.class
 	@rm  -rf ./cs455/overlay/wireformats/Default.class

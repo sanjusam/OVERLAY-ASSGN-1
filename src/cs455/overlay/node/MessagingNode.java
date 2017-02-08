@@ -30,7 +30,7 @@ public class MessagingNode extends AbstractNode {
         TCPCommunicationHandler registerCommHandler;
         try {
             connectionToRegistry = new Socket(registryHost, registryPort);
-            registerCommHandler = update(connectionToRegistry);  //TODO : Either use the return value or pick from the map.
+            registerCommHandler = update(connectionToRegistry);  //TODO : Either use the return value or pick from the map. -- CAN this is extracted out??
             final Event registerEvent = new RegisterRequest(myHostName, myPortNum);
             registerCommHandler.sendData(registerEvent.getBytes());
         } catch (IOException ioe) {
@@ -40,5 +40,29 @@ public class MessagingNode extends AbstractNode {
        System.out.println("Send registration request to the registry!");
     }
 
+    @Override
+    public void setupOverlay(final String command) throws IOException {
+        System.out.println("Error : Setup Overlay not supported on a messaging node.");
+    }
+
+    @Override
+    public void sendLinkWeight() {
+        System.out.println("Error : Sending Link weights is not supported on Messaging Node.!");  //TODO:: Process Weights
+    }
+
+    @Override
+    public void processLinkWeights() {
+        System.out.println("Link weights are received and processed. Ready to send messages.");
+    }
+
+    @Override
+    public void listMessagingNodes() {
+        System.out.println("Error : Listing Messaging node is not supported on Messaging Node.!");
+    }
+
+    @Override
+    public void ListEdgeWeight() {
+        System.out.println("Error : Listing Edge weight is not supported on Messaging Node.!");
+    }
 
 }

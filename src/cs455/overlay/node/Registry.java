@@ -8,10 +8,10 @@ import cs455.overlay.wireformats.DeregisterRequest;
 import cs455.overlay.wireformats.Event;
 import cs455.overlay.constants.EventConstants;
 import cs455.overlay.constants.EventType;
+import cs455.overlay.wireformats.LinkWeights;
 import cs455.overlay.wireformats.MessagingNodesList;
 import cs455.overlay.wireformats.RegisterRequest;
 import cs455.overlay.wireformats.RegisterAcknowledgement;
-import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -23,6 +23,7 @@ import java.util.Map;
 
 public class Registry extends AbstractNode implements Node {
     final List<NodeDetails> nodeDetailsList = new ArrayList<>();
+    private LinkWeights linkWeightsEvent = null;
 
     public static void main(String args[]) throws Exception {
         int portNum = HelperUtils.getInt(args[0]);
@@ -49,46 +50,134 @@ public class Registry extends AbstractNode implements Node {
     }
 
     @Override
-    public void setupOverlay(final int numConnections)throws IOException {
-        if(nodeDetailsList.size() <= numConnections) {
-            System.out.println("Unable to create overlay : Number of Messaging Nodes Registered " + nodeDetailsList.size() + " Num Overlay requested " + numConnections );
+    public void setupOverlay(final String command)throws IOException {
+        if(overlayConfigured) {
+            System.out.println("Overlay-setup already done - re-run the program to setup the overlay again.");
             return;
         }
-        final Map<NodeDetails, MessagingNodesList>  allOverlays = buildOverlayNodes(numConnections);
+
+        if(!validFirstArgument(command, 2, true)) {  //Error check on the argumnet.
+            return;
+        }
+
+        final int connectionRequirement = HelperUtils.getInt(command.split(" ")[1]);
+
+        if(nodeDetailsList.size() <= connectionRequirement) {
+            System.out.println("Unable to create overlay : Number of Messaging Nodes Registered " + nodeDetailsList.size() + " Num Overlay requested " + connectionRequirement );
+            return;
+        }
+        final Map<NodeDetails, MessagingNodesList>  allOverlays = buildOverlayNodes(connectionRequirement);
         for(final NodeDetails nodeDetails : allOverlays.keySet()) {
             final MessagingNodesList messagingNodesList = allOverlays.get(nodeDetails);
-            TCPCommunicationHandler communicationHandler = getConnectionFromPool(nodeDetails.getFormattedString());
+            TCPCommunicationHandler communicationHandler = getConnectionFromPool(nodeDetails.getFormattedString());  /*Check if a connection is already created to the node, if not create on.*/
             if(communicationHandler == null) {
                 //TODO :: Create connection.
                 Socket socket= new Socket(nodeDetails.getNodeName(), nodeDetails.getPortNum());
                 communicationHandler = update(socket);
+                System.out.println("Sending Messaging Node List");
                 communicationHandler.sendData(messagingNodesList.getBytes());
+            }
+        }
+        overlayConfigured = true;
+    }
+
+    @Override
+    public void sendLinkWeight() {
+        final LinkWeights linkWeights = generateLinkWeights();
+        if(!overlayConfigured) {
+            System.out.println("Cannot send the links weights as the overlay is not configured yet");
+            return;
+        }
+
+        for(final NodeDetails nodeDetails : nodeDetailsList) {
+            TCPCommunicationHandler communicationHandler = getConnectionFromPool(nodeDetails.getFormattedString());  /*Check if a connection is already created to the node, if not create on.*/
+            try {
+                if(communicationHandler == null) {
+                    System.out.println("Error : This case should not have happened");
+                    Socket socket= new Socket(nodeDetails.getNodeName(), nodeDetails.getPortNum());
+                    communicationHandler = update(socket);
+                }
+                communicationHandler.sendData(linkWeights.getBytes());
+            } catch (IOException ioe) {
+                System.out.println("ERROR : Error in sending link weights to node " + nodeDetails.getFormattedString());
             }
         }
     }
 
-    private Map<NodeDetails, MessagingNodesList> buildOverlayNodes(final int numConnections) {
+    @Override
+    public void processLinkWeights() {
+        System.out.println(("Error : Processing received link weights is not supported on Registry"));
+        return;
+    }
+
+    @Override
+    public void listMessagingNodes() {
+        if(nodeDetailsList.size() == 0) {
+            System.out.println("Messaging Nodes are not configured yet");
+            return;
+        }
+        for(final NodeDetails nodeDetails  : nodeDetailsList ) {
+            System.out.println("Messaging node : " + nodeDetails.getFormattedString());
+        }
+    }
+
+    @Override
+    public void ListEdgeWeight() {
+        final LinkWeights linkWeights = generateLinkWeights();
+        if(linkWeights == null) {
+            return;
+        } else {
+            for(final String weights : linkWeights.getLinkWeightList()) {
+                System.out.println(weights);
+            }
+        }
+    }
+
+
+    private LinkWeights generateLinkWeights() {
+        if(!overlayConfigured) {
+            System.out.println("Error : Network Overlay not configured, Link weights cannot be assigned.");
+            return null;
+        }
+        if(linkWeightsEvent != null) {
+            return  linkWeightsEvent;
+        }
+        linkWeightsEvent = new LinkWeights(0);
+        for(final NodeDetails nodeDetails : nodeDetailsList) {
+            for(final NodeDetails connectedNode : nodeDetails.getConnections()) {
+                int weight = HelperUtils.generateRandomNumber(1, 10);
+                String weightString = nodeDetails.getFormattedString() + " " + connectedNode.getFormattedString() +" " + weight;
+                linkWeightsEvent.addLinkWeights(weightString);
+            }
+        }
+        return linkWeightsEvent;
+    }
+
+    private Map<NodeDetails, MessagingNodesList> buildOverlayNodes(final int connectionRequirement) {
         final Map<NodeDetails, MessagingNodesList> overlayList = new HashMap<>();
-        buildConnectionsOnAllNodes();  //First builds overlay connection all nodes.
-        buildOverlayEachNodeNodes(numConnections);
+        buildPeerMessagingNodeOnAllNodes();  /*First builds overlay connection all nodes - to avoid network partitions. */
+        buildPeerMessagingNodesOnEachNode(connectionRequirement);  /*Build connections on the nodes */
         for(final NodeDetails nodeDetails : nodeDetailsList) {
             System.out.println("All Connections for node      " + nodeDetails.getFormattedString() + " " + nodeDetails.getAllConnections());
             System.out.println("Created Connections for node  " + nodeDetails.getFormattedString() + " " + nodeDetails.getConnections().size());
-            MessagingNodesList temp = buildMessaginNodeListForEachNode(nodeDetails);
+            MessagingNodesList temp = buildMessagingNodeList(nodeDetails);  /* Build the message to be send to each node*/
             overlayList.put(nodeDetails, temp);
         }
         return overlayList;
     }
 
-    private MessagingNodesList buildMessaginNodeListForEachNode(final NodeDetails nodeDetails) {
+    private MessagingNodesList buildMessagingNodeList(final NodeDetails nodeDetails) {
         final MessagingNodesList overlayList = new MessagingNodesList(0);
+        if ((nodeDetails.getConnections().isEmpty()) || (nodeDetails.getConnections().size() <= 0)) {
+            return overlayList;
+        }
         for(final NodeDetails connectedNodes : nodeDetails.getConnections()) {
             overlayList.addNodesToList(connectedNodes.getFormattedString());
         }
         return overlayList;
     }
 
-    private void buildConnectionsOnAllNodes() {
+    private void buildPeerMessagingNodeOnAllNodes() {
         /*This is to avoid network partition.*/
         final List<NodeDetails> tmpNodeDetailsList  = nodeDetailsList;
         ListIterator<NodeDetails> nodeListIterator = tmpNodeDetailsList.listIterator();
@@ -102,23 +191,30 @@ public class Registry extends AbstractNode implements Node {
         }
     }
 
-    private void buildOverlayEachNodeNodes(final int numConnections) {
+    private void buildPeerMessagingNodesOnEachNode(final int connectionRequirement) {
         /*Check capacity of each nodes and creates links for each node.*/
         final List<NodeDetails> tmpNodeDetailsList  = nodeDetailsList;
         ListIterator<NodeDetails> nodeListIterator = tmpNodeDetailsList.listIterator();
         while (nodeListIterator.hasNext()) {
             NodeDetails currentNode = nodeListIterator.next();
-            while (currentNode.moreConnectionsAllowed(numConnections)) {
+            while (currentNode.moreConnectionsAllowed(connectionRequirement)) {
                 int randomNum = HelperUtils.generateRandomNumber(0, tmpNodeDetailsList.size()-1);
                 NodeDetails connectingNode = nodeDetailsList.get(randomNum);
-                if (!connectingNode.moreConnectionsAllowed(numConnections)) {
-                    continue;
-                }
-                if(!currentNode.getFormattedString().equals(connectingNode.getFormattedString())) {
+                if(isNodeContactable(currentNode, connectingNode, connectionRequirement)) {
                     currentNode.addConnections(connectingNode);
                 }
             }
         }
+    }
+
+    private boolean isNodeContactable(final NodeDetails source, final NodeDetails destination, final int connectionRequirement) {
+        if (!destination.moreConnectionsAllowed(connectionRequirement)) {  /*Check Maximum connections reached.*/
+            return false;
+        }
+        if(source.getFormattedString().equals(destination.getFormattedString())) {  /*Connection to itself is not supported.*/
+            return false;
+        }
+        return !source.nodeAlreadyConnected(destination);  /*Connect if not already connected.*/
     }
 
     private void deRegisterNode(final DeregisterRequest deregisterRequest, final Socket socket) {

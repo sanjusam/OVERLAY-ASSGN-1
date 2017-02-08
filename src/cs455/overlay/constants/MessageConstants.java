@@ -13,4 +13,5 @@ public class MessageConstants {
     public static final String IP_MISMATCH_DEREGISTRATION = "Node Registration Failed : Ip mismatch ";
 
     public static final String INVALID_PORT_START_FAILURE = "Cannot Start registry - Invalid port number for registry";
+    public static final String NODE_PORT_SEPARATOR = ":";
 }
