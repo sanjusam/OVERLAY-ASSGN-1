@@ -13,7 +13,10 @@ public enum EventType {
     TASK_INITIATE(6, "task-initiate", "init"),
     LIST_MSG_NODES(7, "list-messaging nodes", "ls node"),
     LIST_WEIGHTS(8, "list-weights", "ls wt"),
-    SEND_LINK_WEIGHTS(9, "send-overlay-link-weights", "send wt");
+    SEND_LINK_WEIGHTS(9, "send-overlay-link-weights", "send wt"),
+    TASK_COMPLETE(10, "Task Complete", "task complete"),
+    PRINT_SHORT_PATH(11, "print-shortest-path","print-shortest-path"),
+    EXIT_OVERLAY(12, "exit-overlay","exit-overlay");
 
     private final int value;
     private final String longCommand;

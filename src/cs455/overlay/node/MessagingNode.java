@@ -61,8 +61,24 @@ public class MessagingNode extends AbstractNode {
     }
 
     @Override
-    public void ListEdgeWeight() {
+    public void listEdgeWeight() {
         System.out.println("Error : Listing Edge weight is not supported on Messaging Node.!");
+    }
+
+    @Override
+    public void startMessaging(final String numRounds) {
+        //TODO ::  Write the code for start messaging
+        System.out.println("Messaging Starts.");
+    }
+
+    @Override
+    public void printShortestPath() {
+        //TODO :: Print shortest path
+    }
+
+    @Override
+    public void exitOverlay() {
+        //TODO :: exit overlay
     }
 
 }

@@ -8,14 +8,13 @@ import cs455.overlay.utils.HelperUtils;
 import cs455.overlay.wireformats.Event;
 import cs455.overlay.constants.EventConstants;
 import cs455.overlay.constants.EventType;
-import cs455.overlay.wireformats.LinkWeights;
 import cs455.overlay.wireformats.MessagingNodesList;
 import cs455.overlay.wireformats.RegisterAcknowledgement;
+import cs455.overlay.wireformats.TaskInitiate;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractNode implements Node, ConnectionObserver {
@@ -68,6 +67,9 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         } else if(eventTypeReceived == EventType.Link_Weights.getValue()) {
             System.out.println("Received Link Weights");
             processLinkWeights();
+        } else if(eventTypeReceived == EventType.TASK_INITIATE.getValue()) {
+            System.out.println("Received start sending messages event.");
+            startMessaging(((TaskInitiate)event).getNumRoundsAsString());
         }
     }
 
@@ -122,9 +124,11 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         } else if(eventType == EventType.LIST_MSG_NODES) {
             listMessagingNodes();
         } else if (eventType == EventType.LIST_WEIGHTS) {
-            ListEdgeWeight();
+            listEdgeWeight();
         } else if (eventType == EventType.SEND_LINK_WEIGHTS) {
             sendLinkWeight();
+        } else if (eventType == EventType.TASK_INITIATE) {
+            startMessaging(command);
         }
     }
 

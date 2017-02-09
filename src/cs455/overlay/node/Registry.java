@@ -56,7 +56,7 @@ public class Registry extends AbstractNode implements Node {
             return;
         }
 
-        if(!validFirstArgument(command, 2, true)) {  //Error check on the argumnet.
+        if(!validFirstArgument(command, 2, true)) {  //Error check on the argument.
             return;
         }
 
@@ -84,11 +84,9 @@ public class Registry extends AbstractNode implements Node {
     @Override
     public void sendLinkWeight() {
         final LinkWeights linkWeights = generateLinkWeights();
-        if(!overlayConfigured) {
-            System.out.println("Cannot send the links weights as the overlay is not configured yet");
+        if(linkWeights == null) {
             return;
         }
-
         for(final NodeDetails nodeDetails : nodeDetailsList) {
             TCPCommunicationHandler communicationHandler = getConnectionFromPool(nodeDetails.getFormattedString());  /*Check if a connection is already created to the node, if not create on.*/
             try {
@@ -107,7 +105,6 @@ public class Registry extends AbstractNode implements Node {
     @Override
     public void processLinkWeights() {
         System.out.println(("Error : Processing received link weights is not supported on Registry"));
-        return;
     }
 
     @Override
@@ -122,7 +119,7 @@ public class Registry extends AbstractNode implements Node {
     }
 
     @Override
-    public void ListEdgeWeight() {
+    public void listEdgeWeight() {
         final LinkWeights linkWeights = generateLinkWeights();
         if(linkWeights == null) {
             return;
@@ -133,6 +130,31 @@ public class Registry extends AbstractNode implements Node {
         }
     }
 
+    @Override
+    public void startMessaging(final String command) {
+        if(!overlayConfigured || linkWeightsEvent == null) {
+            System.out.println("Either the overlay is not setup, or the link-weights are not assigned");
+            System.out.println("Overlay setup " + overlayConfigured);
+            System.out.println("Link Weights  " + ((linkWeightsEvent == null)? "Is null": "Not Null"));
+            return;
+        }
+
+        if(!validFirstArgument(command, 2, true)) {  //Error check on the argument.
+            return;
+        }
+        final int numRounds = HelperUtils.getInt(command.split(" ")[1]);
+
+    }
+
+    @Override
+    public void printShortestPath() {
+        System.out.println(("Error : Print shortest path is not supported on Registry"));
+    }
+
+    @Override
+    public void exitOverlay() {
+        System.out.println(("Error : Exit Overlay is not supported on Registry"));
+    }
 
     private LinkWeights generateLinkWeights() {
         if(!overlayConfigured) {

@@ -55,7 +55,11 @@ public class EventFactory {
         } else if (eventTypeReceived == EventType.Link_Weights.getValue()) {
             System.out.println("Link Weights : Received Link weights.");
             return new LinkWeights(incomingBytes);
-        } else {
+        } else if (eventTypeReceived ==  EventType.TASK_INITIATE.getValue()) {
+            System.out.println("Send the start Message");
+            return new Default();
+            //TODO :: Implement the start message.
+        }  else {
             System.out.println("Message Received : Undefined - add proper handling ");
             return new Default();  //TODO ::  Add all cases.
         }

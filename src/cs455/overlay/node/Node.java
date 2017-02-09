@@ -12,5 +12,8 @@ public interface Node {
     void sendLinkWeight();
     void processLinkWeights();
     void listMessagingNodes();
-    void ListEdgeWeight();
+    void listEdgeWeight();
+    void startMessaging(final String command);
+    void printShortestPath();
+    void exitOverlay();
 }
