@@ -5,12 +5,15 @@ import cs455.overlay.transport.ConnectionObserver;
 import cs455.overlay.transport.TCPCommunicationHandler;
 import cs455.overlay.transport.TCPServerThread;
 import cs455.overlay.utils.HelperUtils;
+import cs455.overlay.wireformats.DeregisterRequest;
 import cs455.overlay.wireformats.Event;
-import cs455.overlay.constants.EventConstants;
 import cs455.overlay.constants.EventType;
 import cs455.overlay.wireformats.MessagingNodesList;
 import cs455.overlay.wireformats.RegisterAcknowledgement;
+import cs455.overlay.wireformats.RegisterRequest;
+import cs455.overlay.wireformats.TaskComplete;
 import cs455.overlay.wireformats.TaskInitiate;
+import cs455.overlay.wireformats.TrafficSummary;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -22,7 +25,9 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
     public static String ipAddress;
 
     final Map<String, TCPCommunicationHandler> communicationHandlerMap = new HashMap<>();
+    TCPCommunicationHandler registerCommHandler;
     protected boolean overlayConfigured = false;
+    protected boolean requestedToExitOverlay = false;
 
     protected int startTCPServerThread (final int portNum) throws IOException {
         /* 1. Starts up the server thread on the node on a random/specified port
@@ -50,28 +55,64 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         return communicationHandler;
     }
 
-    @Override
+    @Override  //Something that comes to the Node
     public void onEvent(final Event event, final Socket socket) {
         final int eventTypeReceived = event.getType();
-        if(eventTypeReceived == EventType.REGISTER_RESPONSE.getValue()) {
-            RegisterAcknowledgement acknowledgement = (RegisterAcknowledgement) event;
-            if(acknowledgement.getCode() == EventConstants.REGISTER_OR_DEREGISTER_FAILURE) {
-                System.out.println("Node Failed to Register");
-            } else {
-                System.out.println("Node Registration Successful");
-            }
-            System.out.println("Additional Information : " + ((RegisterAcknowledgement)event).getAdditionalInfo());
-        } else if(eventTypeReceived == EventType.MESSAGING_NODES_LIST.getValue()) {
-            System.out.println("Request to setup overlay received from Registry");
-            makeConnectionsOnOverLayNodes((MessagingNodesList)event);
+        if(event.getType() == EventType.REGISTER_REQUEST.getValue()) {
+            registerNode((RegisterRequest) event, socket);
+        } else if(event.getType() == EventType.DEREGISTER_REQUEST.getValue()) {
+            deRegisterNode((DeregisterRequest) event, socket);
+        } else if(eventTypeReceived == EventType.REGISTER_RESPONSE.getValue()) {
+            registerNodeAcknowledgement((RegisterAcknowledgement) event);
+        } else if (eventTypeReceived == EventType.MESSAGING_NODES_LIST.getValue()) {
+            makeConnectionsOnOverLayNodes((MessagingNodesList) event);
         } else if(eventTypeReceived == EventType.Link_Weights.getValue()) {
-            System.out.println("Received Link Weights");
             processLinkWeights();
         } else if(eventTypeReceived == EventType.TASK_INITIATE.getValue()) {
-            System.out.println("Received start sending messages event.");
-            startMessaging(((TaskInitiate)event).getNumRoundsAsString());
+            initiateMessagingSignalForNodes(((TaskInitiate) event).getNumRoundsAsString());
+        } else if(eventTypeReceived == EventType.TASK_COMPLETE.getValue()) {
+            final TaskComplete taskComplete = (TaskComplete) event;
+            acknowledgeTaskComplete(taskComplete.getNodeIpAddress(), taskComplete.getPortNum());
+        } else if (eventTypeReceived == EventType.PULL_TRAFFIC_SUMMARY.getValue()) {
+            pullTrafficSummary();
+        } else if (eventTypeReceived == EventType.TRAFFIC_SUMMARY.getValue()) {
+            printTrafficSummary((TrafficSummary) event);
+        }
+
+    }
+
+    @Override //Something that would be send out.
+    public void processCommand(final String command) {
+        final EventType eventType = EventType.getEventTypeFromCommand(command.split(" ")[0]);
+        if(eventType == null) {
+            System.out.println("Unknown command");
+            return;
+        }
+        if(eventType == EventType.MESSAGING_NODES_LIST){
+            try {
+                setupOverlay(command);
+            } catch (IOException ioe) {
+                System.out.println("Failed to setup overlay.");
+                return;
+            }
+        }
+        if(eventType == EventType.SEND_LINK_WEIGHTS) {
+            sendLinkWeight();
+        } else if(eventType == EventType.LIST_MSG_NODES) {
+            listMessagingNodes();
+        } else if (eventType == EventType.LIST_WEIGHTS) {
+            listEdgeWeight();
+        } else if (eventType == EventType.SIGNAL_TO_START_MSG) {
+            initiateMessagingSignalForNodes(command);
+        } else if (eventType == EventType.TASK_INITIATE) {
+            startMessaging(command);
+        } else if (eventType == EventType.DEREGISTER_REQUEST) {
+            requestDeRegisterNode();
+        } else if (eventType == EventType.EXIT_OVERLAY) {
+            requestDeRegisterNode(); //TODO :: WHAT??
         }
     }
+
 
     private void makeConnectionsOnOverLayNodes(final MessagingNodesList nodesList) {
         /*Walk through the all the messaging node, create connection and listen to the incoming connections.*/
@@ -104,32 +145,19 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         System.out.println("All connections are established. Number of connections: " + connectionsMade);
     }
 
-    @Override
-    public void processCommand(final String command) {
-        final EventType eventType = EventType.getEventTypeFromCommand(command.split(" ")[0]);
-        if(eventType == null) {
-            System.out.println("Unknown command");
-            return;
+
+    private void requestDeRegisterNode() {
+        final DeregisterRequest deregisterRequest = new DeregisterRequest(ipAddress, portNum);
+        try {
+            sendMessageToRegistry(deregisterRequest.getBytes());
+        } catch (IOException ioe ) {
+            System.out.println("Unable to send the traffic stats to the registry");
         }
-        if(eventType == EventType.MESSAGING_NODES_LIST){
-            try {
-                setupOverlay(command);
-            } catch (IOException ioe) {
-                System.out.println("Failed to setup overlay.");
-                return;
-            }
-        }
-        if(eventType == EventType.SEND_LINK_WEIGHTS) {
-            sendLinkWeight();
-        } else if(eventType == EventType.LIST_MSG_NODES) {
-            listMessagingNodes();
-        } else if (eventType == EventType.LIST_WEIGHTS) {
-            listEdgeWeight();
-        } else if (eventType == EventType.SEND_LINK_WEIGHTS) {
-            sendLinkWeight();
-        } else if (eventType == EventType.TASK_INITIATE) {
-            startMessaging(command);
-        }
+    }
+
+    private void requestExitOverlay() {
+        requestedToExitOverlay = true;
+        requestDeRegisterNode();
     }
 
     protected boolean validFirstArgument(final String commandToValidate, final int expectedParts, final boolean isNumeric) {
@@ -165,4 +193,10 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         final Thread commandListenerThread = new Thread(commandListener);
         commandListenerThread.start();
     }
+
+    protected boolean sendMessageToRegistry(byte [] bytesToSend) {
+        return registerCommHandler.sendData(bytesToSend);
+    }
+
+
 }

@@ -7,11 +7,13 @@ import cs455.overlay.utils.HelperUtils;
 import cs455.overlay.wireformats.DeregisterRequest;
 import cs455.overlay.wireformats.Event;
 import cs455.overlay.constants.EventConstants;
-import cs455.overlay.constants.EventType;
 import cs455.overlay.wireformats.LinkWeights;
 import cs455.overlay.wireformats.MessagingNodesList;
+import cs455.overlay.wireformats.PullTrafficSummary;
 import cs455.overlay.wireformats.RegisterRequest;
 import cs455.overlay.wireformats.RegisterAcknowledgement;
+import cs455.overlay.wireformats.TaskInitiate;
+import cs455.overlay.wireformats.TrafficSummary;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -24,6 +26,7 @@ import java.util.Map;
 public class Registry extends AbstractNode implements Node {
     final List<NodeDetails> nodeDetailsList = new ArrayList<>();
     private LinkWeights linkWeightsEvent = null;
+    private int taskCompleted = 0;
 
     public static void main(String args[]) throws Exception {
         int portNum = HelperUtils.getInt(args[0]);
@@ -32,21 +35,9 @@ public class Registry extends AbstractNode implements Node {
             System.out.println(MessageConstants.INVALID_PORT_START_FAILURE);
             System.exit(-1);
         }
-
         Registry registry = new Registry();
         registry.startTCPServerThread(portNum);
         registry.startCommandListener();
-    }
-
-    @Override
-    public void onEvent(final Event event, final Socket socket) {
-        if(event.getType() == EventType.REGISTER_REQUEST.getValue()) {
-            System.out.println("Received a registration request from node");
-            registerNode((RegisterRequest)event, socket);
-        }else if(event.getType() == EventType.DEREGISTER_REQUEST.getValue()) {
-            System.out.println("Received a registration request from node");
-            deRegisterNode((DeregisterRequest)event, socket);
-        }
     }
 
     @Override
@@ -121,9 +112,7 @@ public class Registry extends AbstractNode implements Node {
     @Override
     public void listEdgeWeight() {
         final LinkWeights linkWeights = generateLinkWeights();
-        if(linkWeights == null) {
-            return;
-        } else {
+        if(linkWeights != null) {
             for(final String weights : linkWeights.getLinkWeightList()) {
                 System.out.println(weights);
             }
@@ -131,30 +120,76 @@ public class Registry extends AbstractNode implements Node {
     }
 
     @Override
-    public void startMessaging(final String command) {
+    public void initiateMessagingSignalForNodes(final String numRoundsStr) {
         if(!overlayConfigured || linkWeightsEvent == null) {
             System.out.println("Either the overlay is not setup, or the link-weights are not assigned");
             System.out.println("Overlay setup " + overlayConfigured);
-            System.out.println("Link Weights  " + ((linkWeightsEvent == null)? "Is null": "Not Null"));
+            System.out.println("Link Weights  " + ((linkWeightsEvent == null)? "Null": "Not Null"));
             return;
         }
-
-        if(!validFirstArgument(command, 2, true)) {  //Error check on the argument.
+        if(!validFirstArgument(numRoundsStr, 2, true)) {  //Error check on the argument.
             return;
         }
-        final int numRounds = HelperUtils.getInt(command.split(" ")[1]);
-
+        final int numRounds = HelperUtils.getInt(numRoundsStr.split(" ")[1]);
+        final TaskInitiate taskInitiate = new TaskInitiate(numRounds);
+        try {
+            broadcastMessageToAllNodes(taskInitiate.getBytes());
+        } catch (IOException ioe) {
+            System.out.println("ERROR : Failed to send data to all nodes " );
+        }
     }
 
+   @Override
+    public void startMessaging(final String numRoundsStr) {
+        System.out.println("INFO : Start Messaging is not supported on Registry");
+    }
     @Override
     public void printShortestPath() {
-        System.out.println(("Error : Print shortest path is not supported on Registry"));
+        System.out.println("INFO : Print shortest path is not supported on Registry");
     }
 
     @Override
     public void exitOverlay() {
-        System.out.println(("Error : Exit Overlay is not supported on Registry"));
+        System.out.println("ERROR : Exit Overlay is not supported on Registry");
     }
+
+    @Override
+    public synchronized void acknowledgeTaskComplete(final String node, final int port) {
+        System.out.println(("INFO : Task Completed Acknowledged"));
+        ++taskCompleted;
+
+        //TODO :: PUll traffic summary;
+        if(taskCompleted == nodeDetailsList.size()) {
+            System.out.println("SANJU :: Received task complete from all nodes. - Pulling Traffic summary");
+            pullTrafficSummary();
+        } else {
+            System.out.println("SANJU :: Waiting to receive Task Completed from all nodes " + taskCompleted +"/" + nodeDetailsList.size());
+        }
+
+    }
+
+    @Override
+    public void pullTrafficSummary() {  //TODO : Need to understand more.
+        System.out.println(("INFO : Task Completed Acknowledged - Pulling Traffic Summary"));
+        final PullTrafficSummary pullTrafficSummary = new PullTrafficSummary();
+        try {
+            broadcastMessageToAllNodes(pullTrafficSummary.getBytes());
+        } catch (IOException ioe) {
+            System.out.println("ERROR : Unable to send pull-traffic summary to all nodes");
+        }
+    }
+
+    @Override
+    public void registerNodeAcknowledgement(final RegisterAcknowledgement acknowledgement) {
+        System.out.println("ERROR : Register node acknowledgement is not supported on Registry");
+    }
+
+    @Override
+    public void printTrafficSummary(final TrafficSummary trafficSummary) {
+        System.out.println(("INFO :TODO Printing values"));
+        System.out.println(trafficSummary.summaryFormatted());
+    }
+
 
     private LinkWeights generateLinkWeights() {
         if(!overlayConfigured) {
@@ -239,7 +274,8 @@ public class Registry extends AbstractNode implements Node {
         return !source.nodeAlreadyConnected(destination);  /*Connect if not already connected.*/
     }
 
-    private void deRegisterNode(final DeregisterRequest deregisterRequest, final Socket socket) {
+    @Override
+    public void deRegisterNode(final DeregisterRequest deregisterRequest, final Socket socket) {
         /* Checks
            1. The requested IP, is the same as the source of the request.
            2. Checks if already registered.
@@ -263,12 +299,12 @@ public class Registry extends AbstractNode implements Node {
         sendEvent(registerAck, socket);
     }
 
-    private void registerNode(final RegisterRequest registerRequestEvent, final Socket socket) {
+    @Override
+    public void registerNode(final RegisterRequest registerRequestEvent, final Socket socket) {
         /* Checks
            1. The requested IP, is the same as the source of the request.
            2. Checks if already registered.
          */
-
         final boolean alreadyRegistered = registered(registerRequestEvent.getNodeIpAddress(), registerRequestEvent.getPortNum());
         final boolean ipAddressSame = matchIpForMessageAndSocket(socket, registerRequestEvent.getNodeIpAddress());
         RegisterAcknowledgement registerAck;
@@ -308,48 +344,35 @@ public class Registry extends AbstractNode implements Node {
         try {
             final TCPSender sender = new TCPSender(socket);
             byte [] bytesToSend = eventToSend.getBytes();
-//            System.out.println("ACK Data Send : " + Arrays.toString(bytesToSend));
             sender.sendData(bytesToSend);
         } catch (IOException ioe) {
-            System.out.println("Error : Unable to Send registration acknowledgement ");
+            System.out.println("ERROR : Unable to Send registration acknowledgement ");
             ioe.printStackTrace();
             return false;
         }
-        System.out.println("Send registration acknowledgement " + socket.getInetAddress() + "     " + socket.getLocalPort() + "  " + socket.getPort()  );
+        System.out.println("INFO : Send registration acknowledgement " + socket.getInetAddress() + "     " + socket.getLocalPort() + "  " + socket.getPort()  );
         return true;
     }
 
-/*
-    private Socket getSocketToSendEvent(final String hostName, final int portNum) {
-        return communicationPreferences.get(hostName + portNum);
-    }
-
-    //Copied from the Messaging Node.
-    private void handleSend(final String commandLine) {
-        String [] parts = commandLine.split(" ");
-        final String message =  parts[3];
-        final Socket socket = communicationPreferences.get(parts[1]+ HelperUtils.getInt(parts[2]));
-        if(socket == null) {
-            System.out.println("Unable to get the socket for communication - Node might not be connected !!!");
-            return;
-        }
-        try {
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            out.println(message);
-        } catch (final IOException ioe) {
-            ioe.printStackTrace();
-            System.exit(-1);
-        }
-    }
-
-*/
     private boolean registered (final String nodeName, final int portNum) {
         for(final NodeDetails nodeDetails : nodeDetailsList) {
-            if ((nodeDetails.getNodeName().equals(nodeName)) && (nodeDetails.getPortNum()== portNum)) {
+            if ((nodeDetails.getNodeName().equals(nodeName)) && (nodeDetails.getPortNum() == portNum)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private void broadcastMessageToAllNodes(final byte[] byteStreamToSend) throws IOException {
+        for(final NodeDetails nodeDetails : nodeDetailsList) {
+            TCPCommunicationHandler communicationHandler = getConnectionFromPool(nodeDetails.getFormattedString());  /*Check if a connection is already created to the node, if not create on.*/
+            if(communicationHandler == null) {
+                System.out.println("INFO : Create a connection for node " + nodeDetails.getFormattedString());
+                Socket socket= new Socket(nodeDetails.getNodeName(), nodeDetails.getPortNum());
+                communicationHandler = update(socket);
+            }
+            communicationHandler.sendData(byteStreamToSend);
+        }
     }
 
     private boolean matchIpForMessageAndSocket(final Socket socket, final String nodeIpAddress) {
@@ -367,8 +390,6 @@ public class Registry extends AbstractNode implements Node {
             ipAddressInSocket = ipAddressInSocket.substring(0, ipAddressInSocket.indexOf(":"));
             System.out.println("Stripped  : : Current Value is : " + ipAddressInSocket);
         }
-
-
         System.out.println("Remote IP Address  : " + ipAddressInSocket + " Ipaddress in message " + nodeIpAddress);
         return ipAddressInSocket.equals(nodeIpAddress);
     }

@@ -10,13 +10,16 @@ public enum EventType {
     DEREGISTER_REQUEST(3,"deregister", "dereg"),
     MESSAGING_NODES_LIST(4,"setup-overlay", "setup-overlay"),
     Link_Weights(5,"link-weights", "weights"),
-    TASK_INITIATE(6, "task-initiate", "init"),
+    SIGNAL_TO_START_MSG(6, "start", "start"),
     LIST_MSG_NODES(7, "list-messaging nodes", "ls node"),
     LIST_WEIGHTS(8, "list-weights", "ls wt"),
     SEND_LINK_WEIGHTS(9, "send-overlay-link-weights", "send wt"),
     TASK_COMPLETE(10, "Task Complete", "task complete"),
     PRINT_SHORT_PATH(11, "print-shortest-path","print-shortest-path"),
-    EXIT_OVERLAY(12, "exit-overlay","exit-overlay");
+    EXIT_OVERLAY(12, "exit-overlay","exit-overlay"),
+    PULL_TRAFFIC_SUMMARY(13, "pull-traffic-summary","pull-sum"),
+    TRAFFIC_SUMMARY(14, "pull-traffic-summary","pull-sum"),
+    TASK_INITIATE(15, "task-initiate","task-init");
 
     private final int value;
     private final String longCommand;

@@ -21,13 +21,14 @@ public class TCPCommunicationHandler {
         }
     }
 
-    public void sendData(byte[] dataToSend) {
+    public boolean sendData(byte[] dataToSend) {
         try {
             sender.sendData(dataToSend);
+            return true;
         }catch (IOException ioe) {
             System.out.println("Exiting : Unable to send data");
             ioe.printStackTrace();
-            System.exit(-1);
+            return  false;
         }
     }
 

@@ -55,11 +55,19 @@ public class EventFactory {
         } else if (eventTypeReceived == EventType.Link_Weights.getValue()) {
             System.out.println("Link Weights : Received Link weights.");
             return new LinkWeights(incomingBytes);
-        } else if (eventTypeReceived ==  EventType.TASK_INITIATE.getValue()) {
+        } else if (eventTypeReceived == EventType.SIGNAL_TO_START_MSG.getValue()) {
+            System.out.println("Link Weights : Received Link weights.");
+            return new StartMessagingSignal(incomingBytes);
+        }else if (eventTypeReceived ==  EventType.TASK_INITIATE.getValue()) {
             System.out.println("Send the start Message");
-            return new Default();
-            //TODO :: Implement the start message.
-        }  else {
+            return new TaskInitiate(incomingBytes);
+        } else if (eventTypeReceived ==  EventType.TASK_COMPLETE.getValue()) {
+                return new TaskComplete(incomingBytes);
+        } else if (eventTypeReceived ==  EventType.PULL_TRAFFIC_SUMMARY.getValue()) {
+            return new PullTrafficSummary(incomingBytes);
+        } else if (eventTypeReceived ==  EventType.TRAFFIC_SUMMARY.getValue()) {
+            return new PullTrafficSummary(incomingBytes);
+        } else {
             System.out.println("Message Received : Undefined - add proper handling ");
             return new Default();  //TODO ::  Add all cases.
         }
