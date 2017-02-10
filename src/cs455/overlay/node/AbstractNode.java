@@ -68,8 +68,10 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
             makeConnectionsOnOverLayNodes((MessagingNodesList) event);
         } else if(eventTypeReceived == EventType.Link_Weights.getValue()) {
             processLinkWeights();
-        } else if(eventTypeReceived == EventType.TASK_INITIATE.getValue()) {
+        } else if(eventTypeReceived == EventType.SIGNAL_TO_START_MSG.getValue()) {
             initiateMessagingSignalForNodes(((TaskInitiate) event).getNumRoundsAsString());
+        }  else if(eventTypeReceived == EventType.TASK_INITIATE.getValue()) {
+            startMessaging(((TaskInitiate) event).getNumRoundsAsString());
         } else if(eventTypeReceived == EventType.TASK_COMPLETE.getValue()) {
             final TaskComplete taskComplete = (TaskComplete) event;
             acknowledgeTaskComplete(taskComplete.getNodeIpAddress(), taskComplete.getPortNum());
@@ -81,7 +83,7 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
 
     }
 
-    @Override //Something that would be send out.
+    @Override //Something that would be send out - reading from the command line
     public void processCommand(final String command) {
         final EventType eventType = EventType.getEventTypeFromCommand(command.split(" ")[0]);
         if(eventType == null) {

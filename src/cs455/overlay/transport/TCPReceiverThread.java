@@ -25,20 +25,16 @@ public class TCPReceiverThread implements Runnable {
         System.out.println("Initiating Data receiver " + socket.getInetAddress().toString() +"  " + socket.getPort() + " " + socket.getLocalPort());
         while (socket != null) {
             byte[] receivedData = receiveDataByte();
-            System.out.println("Received Data on Socket " + socket.getLocalPort());
             eventProcessor.processReceivedEvent(receivedData, socket);
         }
     }
 
     private synchronized byte[] receiveDataByte() {
         int dataLength;
-//        System.out.println("Inside receiveDataByte " );
         try {
             dataLength = dataInputStream.readInt();
-//            System.out.println("Data Length Received " + dataLength);
             byte[] data = new byte[dataLength];
             dataInputStream.readFully(data, 0, dataLength);
-//            System.out.println("Data Received " + Arrays.toString(data));
             return data;
         } catch (IOException ioe) {
             System.out.println("Error : Failed to receive data.");

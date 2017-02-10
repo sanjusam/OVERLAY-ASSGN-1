@@ -10,13 +10,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class TaskInitiate extends AbstractEvent {
+public class PullTrafficSummary extends AbstractEvent {
 
-    private final int numRounds;
-
-    public TaskInitiate(final int numRounds) {
-        super(EventType.TASK_INITIATE.getValue());
-        this.numRounds = numRounds;
+    public PullTrafficSummary() {
+        super(EventType.PULL_TRAFFIC_SUMMARY.getValue());
     }
 
     @Override
@@ -24,7 +21,6 @@ public class TaskInitiate extends AbstractEvent {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
         dout.writeInt(type);
-        dout.writeInt(numRounds);
         dout.flush();
         byte[] marshalledBytes = byteArrayOutputStream.toByteArray();
         byteArrayOutputStream.close();
@@ -32,17 +28,12 @@ public class TaskInitiate extends AbstractEvent {
         return marshalledBytes;
     }
 
-    public TaskInitiate(byte[] marshalledBytes) throws IOException {
+    public PullTrafficSummary(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
         type = dataInputStream.readInt();
-        numRounds = dataInputStream.readInt();
         byteArrayInputStream.close();
         dataInputStream.close();
-    }
-
-    public String getNumRoundsAsString() {
-        return Integer.toString(numRounds);
     }
 
 }

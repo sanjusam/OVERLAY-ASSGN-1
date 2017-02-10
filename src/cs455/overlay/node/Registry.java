@@ -27,6 +27,13 @@ public class Registry extends AbstractNode implements Node {
     final List<NodeDetails> nodeDetailsList = new ArrayList<>();
     private LinkWeights linkWeightsEvent = null;
     private int taskCompleted = 0;
+    private int receivedTrafficStatsFromAllNodes = 0;
+    private int numAllMessagesSent = 0;
+    private int numAllMessagesReceived = 0;
+    private long sumAllMessagesSent = 0 ;
+    private long sumAllMessagesReceived = 0;
+    private boolean printOnce = false;
+
 
     public static void main(String args[]) throws Exception {
         int portNum = HelperUtils.getInt(args[0]);
@@ -158,9 +165,9 @@ public class Registry extends AbstractNode implements Node {
         System.out.println(("INFO : Task Completed Acknowledged"));
         ++taskCompleted;
 
-        //TODO :: PUll traffic summary;
         if(taskCompleted == nodeDetailsList.size()) {
             System.out.println("SANJU :: Received task complete from all nodes. - Pulling Traffic summary");
+            taskCompleted = 0;
             pullTrafficSummary();
         } else {
             System.out.println("SANJU :: Waiting to receive Task Completed from all nodes " + taskCompleted +"/" + nodeDetailsList.size());
@@ -185,11 +192,49 @@ public class Registry extends AbstractNode implements Node {
     }
 
     @Override
-    public void printTrafficSummary(final TrafficSummary trafficSummary) {
-        System.out.println(("INFO :TODO Printing values"));
-        System.out.println(trafficSummary.summaryFormatted());
+    public synchronized void  printTrafficSummary(final TrafficSummary trafficSummary) {
+        ++receivedTrafficStatsFromAllNodes;
+        if(!printOnce) {
+            printHeader();
+            printOnce = true;
+        }
+
+        numAllMessagesSent +=  trafficSummary.getNumOfMessagesSend();
+        numAllMessagesReceived += trafficSummary.getNumOfMessagesReceived();
+        sumAllMessagesSent += trafficSummary.getSumOfSendMessage();
+        sumAllMessagesReceived += trafficSummary.getSumOfReceivedMessages();
+
+        printData(trafficSummary);
+        if(receivedTrafficStatsFromAllNodes == nodeDetailsList.size()) {
+            System.out.println("Sum \t" + numAllMessagesSent + "\t" + sumAllMessagesSent + "\t" + numAllMessagesReceived + "\t" + sumAllMessagesReceived);
+            System.out.println(markerSub);
+            System.out.println(markerMain);
+            numAllMessagesSent = 0;
+            numAllMessagesReceived = 0;
+            sumAllMessagesSent = 0;
+            sumAllMessagesReceived = 0;
+            printOnce = false;
+        }
     }
 
+    private void printHeader() {
+        final String header1 =   "\t    \t\t\tNumber              Number of                                                              Number of " ;
+        final String header2  =  "\t    \t\t\tof messages         messages       Summation of sent           Summation of received       messages" ;
+        final String header3 =   "\tNODE\t\t\tsent                received           messages                        messages            relayed";
+
+        System.out.println(header1);
+        System.out.println(header2);
+        System.out.println(header3);
+        System.out.println(markerMain);
+        System.out.println(markerSub);
+        System.out.flush();
+    }
+
+    private void printData(final TrafficSummary trafficSummary) {
+        System.out.println(trafficSummary.summaryFormatted());
+        System.out.println(markerSub);
+        System.out.flush();
+    }
 
     private LinkWeights generateLinkWeights() {
         if(!overlayConfigured) {
@@ -394,4 +439,6 @@ public class Registry extends AbstractNode implements Node {
         return ipAddressInSocket.equals(nodeIpAddress);
     }
 
+    private final String markerMain =  "\t\t=======================================================================================================";
+    private final String markerSub =  "\t\t-------------------------------------------------------------------------------------------------------";
 }

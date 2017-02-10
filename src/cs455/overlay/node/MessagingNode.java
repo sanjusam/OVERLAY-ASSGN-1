@@ -9,6 +9,7 @@ import cs455.overlay.wireformats.RegisterRequest;
 import cs455.overlay.wireformats.TaskComplete;
 import cs455.overlay.wireformats.TrafficSummary;
 
+import javax.rmi.CORBA.Util;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Socket;
@@ -19,9 +20,9 @@ public class MessagingNode extends AbstractNode {
     private static int registryPort;
 
     private int numOfMessagesSend;
-    private int sumOfSendMessage = 100;
+    private long sumOfSendMessage = 100;
     private int numOfMessagesReceived = 10;
-    private int sumOfReceivedMessages = 10;
+    private long sumOfReceivedMessages = 10;
 
     public static void main(String args[]) throws Exception {
         registryHost = args[0];
@@ -99,17 +100,22 @@ public class MessagingNode extends AbstractNode {
 
     @Override
     public void initiateMessagingSignalForNodes(final String numRoundsStr) {
-        System.out.println("INFO : Start Messaging is not supported on messaging node");
+        System.out.println("INFO : Init Signal for messaging is not supported on messaging node");
     }
 
     @Override
     public void startMessaging(final String numRoundsStr) {
         final int numRounds = Integer.parseInt(numRoundsStr);
+        final int MAX_MESSAGES_PER_ROUND = 5;
         System.out.println("Messaging Starts");  //TODO :: Pick node to send message.
         for(int numSend = 0 ; numSend < numRounds; ++numSend) {
-            ++numOfMessagesSend;
-            sumOfSendMessage += numOfMessagesSend;
-            System.out.println("Sending message to Node " + numSend);
+            for(int messagesPerRound = 0 ; messagesPerRound < MAX_MESSAGES_PER_ROUND ; messagesPerRound++) {
+                int rndMessage = HelperUtils.generateRandomNumber(1, 2147483647);  //TODO handle negatve random number.
+                System.out.println("SANJU :: Random Message  " + rndMessage);
+                ++numOfMessagesSend;
+                sumOfSendMessage += rndMessage;
+                System.out.println("Sending message to Node " + numSend);
+            }
         }
         updateRegistryOnTaskCompletion();
     }

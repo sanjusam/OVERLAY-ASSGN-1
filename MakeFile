@@ -2,7 +2,7 @@ all: clean compile
 	@echo -e '[INFO] Done!'
 
 clean:
-	@echo -e '[INFO] Cleaning up class files'
+	@echo -e '[INFO] Cleanup class files'
 	@rm  -rf ./cs455/overlay/utils/HelperUtils.class
 	@rm  -rf ./cs455/overlay/wireformats/AbstractEvent.class
 	@rm  -rf ./cs455/overlay/wireformats/Default.class
@@ -15,6 +15,9 @@ clean:
 	@rm  -rf ./cs455/overlay/wireformats/RegisterAcknowledgement.class
 	@rm  -rf ./cs455/overlay/wireformats/TaskInitiate.class
 	@rm  -rf ./cs455/overlay/wireformats/TaskComplete.class
+	@rm  -rf ./cs455/overlay/wireformats/PullTrafficSummary.class
+	@rm  -rf ./cs455/overlay/wireformats/TrafficSummary.class
+	@rm  -rf ./cs455/overlay/wireformats/StartMessagingSignal.class
 	@rm  -rf ./cs455/overlay/node/AbstractNode.class
 	@rm  -rf ./cs455/overlay/node/MessagingNode.class
 	@rm  -rf ./cs455/overlay/node/CommandListener.class
@@ -31,9 +34,10 @@ clean:
 	@rm  -rf ./cs455/overlay/constants/EventConstants.class
 	@rm  -rf ./cs455/overlay/constants/EventType.class
 	@rm  -rf ./cs455/overlay/constants/MessageConstants.class
+	@echo -e '[INFO] Done Cleanup class files'
 
 compile:
-	@echo -e '[INFO] Compiling the Sources'
+	@echo -e '[INFO] Compiling Sources'
 	@javac -d . ./src/cs455/overlay/utils/HelperUtils.java
 	@javac -d . ./src/cs455/overlay/constants/EventConstants.java
 	@javac -d . ./src/cs455/overlay/constants/EventType.java
@@ -47,8 +51,11 @@ compile:
 	@javac -d . ./src/cs455/overlay/wireformats/LinkWeights.java
 	@javac -d . ./src/cs455/overlay/wireformats/TaskInitiate.java
 	@javac -d . ./src/cs455/overlay/wireformats/TaskComplete.java
-	@javac -d . ./src/cs455/overlay/node/Node.java
+	@javac -d . ./src/cs455/overlay/wireformats/PullTrafficSummary.java
+	@javac -d . ./src/cs455/overlay/wireformats/TrafficSummary.java
 	@javac -d . ./src/cs455/overlay/wireformats/RegisterAcknowledgement.java
+	@javac -d . ./src/cs455/overlay/wireformats/StartMessagingSignal.java
+	@javac -d . ./src/cs455/overlay/node/Node.java
 	@javac -d . ./src/cs455/overlay/wireformats/EventFactory.java
 	@javac -d . ./src/cs455/overlay/transport/TCPSender.java
 	@javac -d . ./src/cs455/overlay/transport/TCPReceiverThread.java
@@ -62,4 +69,5 @@ compile:
 	@javac -d . ./src/cs455/overlay/node/Registry.java
 	@javac -d . ./src/cs455/overlay/node/MessagingNode.java
 	@javac -d . ./src/cs455/overlay/node/NodeConfiguration.java
+	@echo -e '[INFO] Done Compiling Sources'
 

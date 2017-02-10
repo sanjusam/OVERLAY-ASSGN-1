@@ -14,7 +14,7 @@ public class TaskComplete extends AbstractEvent {
     private final String nodeIpAddress;
     private final int portNum;
 
-    TaskComplete(final String nodeIpAddress, final int portNum) {
+    public TaskComplete(final String nodeIpAddress, final int portNum) {
         super(EventType.TASK_COMPLETE.getValue());
         this.nodeIpAddress = nodeIpAddress;
         this.portNum = portNum;

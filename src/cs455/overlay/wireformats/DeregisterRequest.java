@@ -1,4 +1,3 @@
-// (C) Copyright 2015 Hewlett Packard Enterprise Development LP
 package cs455.overlay.wireformats;
 
 import cs455.overlay.constants.EventType;
@@ -16,7 +15,7 @@ public class DeregisterRequest extends AbstractEvent {
     private final String nodeIpAddress;
     private final int portNum;
 
-    DeregisterRequest(final String nodeIpAddress, final int portNum) {
+    public DeregisterRequest(final String nodeIpAddress, final int portNum) {
         super(EventType.DEREGISTER_REQUEST.getValue());
         this.nodeIpAddress = nodeIpAddress;
         this.portNum = portNum;
