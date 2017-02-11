@@ -1,6 +1,14 @@
 package cs455.overlay.dijkstra;
 
-import java.util.*;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 public class ShortestPathGenerator {
     private int MAX_NODES;
@@ -8,22 +16,16 @@ public class ShortestPathGenerator {
 
 
     // graph to contain the weights
-    private final int[][] graph  = new int[MAX_NODES][MAX_NODES] ;
-    private final ConceptualNode[] nodes   = new ConceptualNode[MAX_NODES];
-
-    private PriorityQueue<ConceptualNode> minHeap = new PriorityQueue<>(
-            MAX_NODES, new Comparator<ConceptualNode>() {
-        @Override
-        public int compare(ConceptualNode o1, ConceptualNode o2) {
-            return Integer.compare(o1.getDistance(), o2.getDistance());
-        }
-    }
-    );
+    private int[][] graph  ;
+    private ConceptualNode[] nodes  ;
+    private PriorityQueue<ConceptualNode> minHeap ;
 
 
     ShortestPathGenerator(final int maxNodes, final int source) {
         this.MAX_NODES = maxNodes;
         this.SOURCE = source;
+        graph = new int[MAX_NODES][MAX_NODES] ;
+        nodes   = new ConceptualNode[MAX_NODES];
 
         for (int i = 0; i < MAX_NODES; i++) {
             for (int j = 0; j < MAX_NODES; j++) {
@@ -33,6 +35,15 @@ public class ShortestPathGenerator {
                     this.graph[i][j] = Integer.MAX_VALUE;
             }
         }
+
+        minHeap = new PriorityQueue<>(
+                MAX_NODES, new Comparator<ConceptualNode>() {
+            @Override
+            public int compare(ConceptualNode o1, ConceptualNode o2) {
+                return Integer.compare(o1.getDistance(), o2.getDistance());
+            }
+        }
+        );
         initialize();
     }
 

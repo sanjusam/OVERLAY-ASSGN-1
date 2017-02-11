@@ -13,11 +13,13 @@ public interface Node {
     void registerNodeAcknowledgement(final RegisterAcknowledgement acknowledgement);
     void setupOverlay(final String command) throws IOException;
     void sendLinkWeight();
+    void makeConnectionsOnOverLayNodes(final MessagingNodesList messagingNodesList);
     void processLinkWeights(final LinkWeights linkWeights);
     void listMessagingNodes();
     void listEdgeWeight();
     void initiateMessagingSignalForNodes(final String numRoundsStr);
     void startMessaging(final String numRoundsStr);
+    void processReceivedMessage(final TransmitMessage transmitMessage);
     void acknowledgeTaskComplete(final String node, final int port);
     void pullTrafficSummary();
     void printTrafficSummary(final TrafficSummary trafficSummary);

@@ -3,10 +3,10 @@ package cs455.overlay.dijkstra;
 import cs455.overlay.constants.MessageConstants;
 
 public class RoutingCache {
-    private final String source ;
-    private final String destination;
-    private  String path ;
-    private  String nextHop;
+    private final String source;
+    private final String destination ;
+    private  String path ="";
+    private  String nextHop ="";
 
     RoutingCache(final String source, final String destination) {
         this.source = source;
@@ -21,6 +21,9 @@ public class RoutingCache {
     }
 
     public void addToPath(final String nextNode) {
+        if (nextNode == null) {
+            return;
+        }
         if(path.isEmpty()) {
             this.path += path;
         } else {

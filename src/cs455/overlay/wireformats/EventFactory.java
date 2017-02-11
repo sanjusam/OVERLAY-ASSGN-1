@@ -67,6 +67,8 @@ public class EventFactory {
             return new PullTrafficSummary(incomingBytes);
         } else if (eventTypeReceived ==  EventType.TRAFFIC_SUMMARY.getValue()) {
             return new TrafficSummary(incomingBytes);
+        } else if (eventTypeReceived ==  EventType.MESSAGE_TRANSMIT.getValue()) {
+            return new TransmitMessage(incomingBytes);
         } else {
             System.out.println("Message Received : Undefined - add proper handling ");
             return new Default();  //TODO ::  Add all cases.

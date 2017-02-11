@@ -3,8 +3,10 @@ package cs455.overlay.dijkstra;
 import cs455.overlay.constants.MessageConstants;
 import cs455.overlay.utils.HelperUtils;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ExtractLinkWeights {
     private List<String> linkWeightList = new ArrayList<>();  // hostnameA:portnumA hostnameB:portnumB weight
@@ -47,12 +49,16 @@ public class ExtractLinkWeights {
 
     private String getActualNode(final String  listOfNodes) {
         String translatedNode = "";
+        boolean trim  = false;
         for(final String node : listOfNodes.split(MessageConstants.NODE_PATH_SEPARATOR)) {
             if(node != null && !node.isEmpty()) {
-                translatedNode += nodeNameMapping.getNodeNameInNumber(node) + MessageConstants.NODE_PATH_SEPARATOR;
+                translatedNode += nodeNameMapping.getNode(HelperUtils.getInt(node)) + MessageConstants.NODE_PATH_SEPARATOR;
+                trim = true;
             }
         }
-        return translatedNode.substring(1, translatedNode.length() - MessageConstants.NODE_PATH_SEPARATOR.length()); // Strip off the last "->"
+        return (trim)
+                ? translatedNode.substring(0, translatedNode.length() - MessageConstants.NODE_PATH_SEPARATOR.length()) // Strip off the trailing  "->"
+                : translatedNode;
     }
 
     private void extractNodes() {
@@ -63,8 +69,10 @@ public class ExtractLinkWeights {
         }
     }
 
-    public NodeToNameMapping getNodeToNameMapping() {
-        return nodeNameMapping;
+    public ArrayList<String> getAllNodes() {
+        final List<String > nodesList = new ArrayList<>();
+        nodesList.addAll(nodeNameMapping.getNodeDetails().keySet());
+        return (ArrayList<String>) nodesList;
     }
 
     public List<RoutingCache> getRoutingForAllNodes() {

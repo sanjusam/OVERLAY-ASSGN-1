@@ -19,7 +19,8 @@ public enum EventType {
     EXIT_OVERLAY(12, "exit-overlay","exit-overlay"),
     PULL_TRAFFIC_SUMMARY(13, "pull-traffic-summary","pull-sum"),
     TRAFFIC_SUMMARY(14, "traffic-summary","traffic-sum"),
-    TASK_INITIATE(15, "task-initiate","task-init");
+    TASK_INITIATE(15, "task-initiate","task-init"),
+    MESSAGE_TRANSMIT(16, "message-send", "msg-send");
 
     private final int value;
     private final String longCommand;

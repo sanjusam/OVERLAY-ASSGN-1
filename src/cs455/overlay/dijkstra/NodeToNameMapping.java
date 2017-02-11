@@ -1,18 +1,15 @@
 package cs455.overlay.dijkstra;
 
-import cs455.overlay.node.NodeDetails;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class NodeToNameMapping {
-    private int nodeNameInNumeric = 1;
-    private NodeDetails nodeDetails;
+    private int nodeNameInNumeric = 0;
 
     private  final Map<String, Integer> nodeDetailsMap = new HashMap<>();
 
     public void addNodeMapping(final String nodeDetails) {
-        if(nodeDetailsMap.get(nodeDetails) != null) {
+        if(nodeDetailsMap.get(nodeDetails) == null) {
             nodeDetailsMap.put(nodeDetails, nodeNameInNumeric);
             ++nodeNameInNumeric;
         }
@@ -28,6 +25,10 @@ public class NodeToNameMapping {
 
     public int getNodeNameInNumber(final String nodeDetail) { // Should be passing in node:portNum format.
         return nodeDetailsMap.get(nodeDetail);
+    }
+
+    public Map<String, Integer> getNodeDetails() {
+        return nodeDetailsMap;
     }
 
 }

@@ -72,6 +72,8 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
             pullTrafficSummary();
         } else if (eventTypeReceived == EventType.TRAFFIC_SUMMARY.getValue()) {
             printTrafficSummary((TrafficSummary) event);
+        } else if(eventTypeReceived == EventType.MESSAGE_TRANSMIT.getValue()) {
+            processReceivedMessage((TransmitMessage) event);
         }
 
     }
@@ -106,38 +108,6 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         } else if (eventType == EventType.EXIT_OVERLAY) {
             requestDeRegisterNode(); //TODO :: WHAT??
         }
-    }
-
-
-    private void makeConnectionsOnOverLayNodes(final MessagingNodesList nodesList) {
-        /*Walk through the all the messaging node, create connection and listen to the incoming connections.*/
-        if(nodesList.getNumNodes()== 0) {
-            System.out.println("INFO : The node is NOT instructed to create any Messaging Node Connection");
-            return;
-        }
-        int connectionsMade = 0;
-        System.out.println("INFO : Number of Messaging Node Connection initiated " + nodesList.getNumNodes());
-        for(final String nodeSpec : nodesList.getMessagingNodeList()) {
-            if(nodeSpec.isEmpty() || nodeSpec.equals("")) {
-                continue;
-            }
-            System.out.println("INFO : Creating Connection to Messaging Node " + nodeSpec);
-            final String nodeName = nodeSpec.split(MessageConstants.NODE_PORT_SEPARATOR)[0];
-            final int portNum = HelperUtils.getInt(nodeSpec.split(MessageConstants.NODE_PORT_SEPARATOR)[1]);
-            if(portNum == -1) {
-                System.out.println("ERROR : Unable to extract port number from node details  " + nodeSpec);
-                System.exit(-1);
-            }
-            try {
-                final Socket nodeConnection = new Socket(nodeName, portNum);
-                update(nodeConnection);  //TODO : Either use the return value or pick from the map.
-                ++connectionsMade;
-            } catch (final IOException ioe) {
-                System.out.println("ERROR : IO Exception thrown while trying to establish connection to " + nodeSpec);
-                System.exit(-1);
-            }
-        }
-        System.out.println("All connections are established. Number of connections: " + connectionsMade);
     }
 
 

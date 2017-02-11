@@ -4,16 +4,8 @@ import cs455.overlay.constants.MessageConstants;
 import cs455.overlay.transport.TCPCommunicationHandler;
 import cs455.overlay.transport.TCPSender;
 import cs455.overlay.utils.HelperUtils;
-import cs455.overlay.wireformats.DeregisterRequest;
-import cs455.overlay.wireformats.Event;
+import cs455.overlay.wireformats.*;
 import cs455.overlay.constants.EventConstants;
-import cs455.overlay.wireformats.LinkWeights;
-import cs455.overlay.wireformats.MessagingNodesList;
-import cs455.overlay.wireformats.PullTrafficSummary;
-import cs455.overlay.wireformats.RegisterRequest;
-import cs455.overlay.wireformats.RegisterAcknowledgement;
-import cs455.overlay.wireformats.TaskInitiate;
-import cs455.overlay.wireformats.TrafficSummary;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -106,6 +98,11 @@ public class Registry extends AbstractNode implements Node {
     }
 
     @Override
+    public void makeConnectionsOnOverLayNodes(final MessagingNodesList messagingNodesList) {
+        System.out.println(("INFO : Make Overlay connections is not supported on Registry"));
+    }
+
+    @Override
     public void listMessagingNodes() {
         if(nodeDetailsList.size() == 0) {
             System.out.println("Messaging Nodes are not configured yet");
@@ -188,7 +185,13 @@ public class Registry extends AbstractNode implements Node {
 
     @Override
     public void registerNodeAcknowledgement(final RegisterAcknowledgement acknowledgement) {
-        System.out.println("ERROR : Register node acknowledgement is not supported on Registry");
+        System.out.println("INFO : Register node acknowledgement is not supported on Registry");
+    }
+
+
+    @Override
+    public void processReceivedMessage(final TransmitMessage transmitMessage) {
+        System.out.println("INFO : Received Random message is not supported on Registry");
     }
 
     @Override
