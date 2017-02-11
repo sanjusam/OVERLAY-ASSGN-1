@@ -101,8 +101,8 @@ public class Registry extends AbstractNode implements Node {
     }
 
     @Override
-    public void processLinkWeights() {
-        System.out.println(("Error : Processing received link weights is not supported on Registry"));
+    public void processLinkWeights(final LinkWeights linkWeights) {
+        System.out.println(("INFO : Processing received link weights is not supported on Registry"));
     }
 
     @Override

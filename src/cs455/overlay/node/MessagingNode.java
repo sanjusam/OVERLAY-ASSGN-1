@@ -1,18 +1,16 @@
 package cs455.overlay.node;
 
 import cs455.overlay.constants.EventConstants;
+import cs455.overlay.constants.MessageConstants;
+import cs455.overlay.dijkstra.ExtractLinkWeights;
+import cs455.overlay.dijkstra.RoutingCache;
 import cs455.overlay.utils.HelperUtils;
-import cs455.overlay.wireformats.DeregisterRequest;
-import cs455.overlay.wireformats.Event;
-import cs455.overlay.wireformats.RegisterAcknowledgement;
-import cs455.overlay.wireformats.RegisterRequest;
-import cs455.overlay.wireformats.TaskComplete;
-import cs455.overlay.wireformats.TrafficSummary;
+import cs455.overlay.wireformats.*;
 
-import javax.rmi.CORBA.Util;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Socket;
+import java.util.List;
 
 public class MessagingNode extends AbstractNode {
 
@@ -69,7 +67,15 @@ public class MessagingNode extends AbstractNode {
     }
 
     @Override
-    public void processLinkWeights() {
+    public void processLinkWeights(final LinkWeights linkWeights) {
+        final String me = ipAddress + MessageConstants.NODE_PORT_SEPARATOR + portNum;
+        ExtractLinkWeights extractLinkWeights = new ExtractLinkWeights(linkWeights.getLinkWeightList(), me);
+        List<RoutingCache> routingCacheList = extractLinkWeights.getRoutingForAllNodes();
+        System.out.println("Printing routing cache list for all nodes.");
+        for(final RoutingCache routingCache : routingCacheList) {
+//            System.
+        }
+
         System.out.println("INFO : Link weights are received and processed. Ready to send messages.");  //TODO:: Process Weights
     }
 

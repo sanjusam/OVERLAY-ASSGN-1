@@ -1,10 +1,6 @@
 package cs455.overlay.node;
 
-import cs455.overlay.wireformats.DeregisterRequest;
-import cs455.overlay.wireformats.Event;
-import cs455.overlay.wireformats.RegisterAcknowledgement;
-import cs455.overlay.wireformats.RegisterRequest;
-import cs455.overlay.wireformats.TrafficSummary;
+import cs455.overlay.wireformats.*;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -17,7 +13,7 @@ public interface Node {
     void registerNodeAcknowledgement(final RegisterAcknowledgement acknowledgement);
     void setupOverlay(final String command) throws IOException;
     void sendLinkWeight();
-    void processLinkWeights();
+    void processLinkWeights(final LinkWeights linkWeights);
     void listMessagingNodes();
     void listEdgeWeight();
     void initiateMessagingSignalForNodes(final String numRoundsStr);

@@ -12,7 +12,7 @@ public class NodeDetails {
     private final List<NodeDetails> myRemoteConnections = new ArrayList<>(); // Keep tracks of the nodes that are connected to me.
     private int allConnections  ; // This keeps tracks of all connection of the node, if it connects, or someone makes a connection.
 
-    NodeDetails(final String nodeName, final int portNum) {
+    public NodeDetails(final String nodeName, final int portNum) {
         this.portNum = portNum;
         this.nodeName = nodeName;
     }

@@ -5,15 +5,8 @@ import cs455.overlay.transport.ConnectionObserver;
 import cs455.overlay.transport.TCPCommunicationHandler;
 import cs455.overlay.transport.TCPServerThread;
 import cs455.overlay.utils.HelperUtils;
-import cs455.overlay.wireformats.DeregisterRequest;
-import cs455.overlay.wireformats.Event;
+import cs455.overlay.wireformats.*;
 import cs455.overlay.constants.EventType;
-import cs455.overlay.wireformats.MessagingNodesList;
-import cs455.overlay.wireformats.RegisterAcknowledgement;
-import cs455.overlay.wireformats.RegisterRequest;
-import cs455.overlay.wireformats.TaskComplete;
-import cs455.overlay.wireformats.TaskInitiate;
-import cs455.overlay.wireformats.TrafficSummary;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -67,7 +60,7 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         } else if (eventTypeReceived == EventType.MESSAGING_NODES_LIST.getValue()) {
             makeConnectionsOnOverLayNodes((MessagingNodesList) event);
         } else if(eventTypeReceived == EventType.Link_Weights.getValue()) {
-            processLinkWeights();
+            processLinkWeights((LinkWeights) event);
         } else if(eventTypeReceived == EventType.SIGNAL_TO_START_MSG.getValue()) {
             initiateMessagingSignalForNodes(((TaskInitiate) event).getNumRoundsAsString());
         }  else if(eventTypeReceived == EventType.TASK_INITIATE.getValue()) {
