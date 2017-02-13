@@ -10,6 +10,7 @@ import cs455.overlay.constants.EventConstants;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
@@ -312,14 +313,31 @@ public class Registry extends AbstractNode implements Node {
     private void buildPeerMessagingNodesOnEachNode(final int connectionRequirement) {
         /*Check capacity of each nodes and creates links for each node.*/
         final List<NodeDetails> tmpNodeDetailsList  = nodeDetailsList;
+        final List <NodeDetails> shuffledNodeDetails = nodeDetailsList;
+//        Collections.shuffle(shuffledNodeDetails);
+        int idx = 0;
         ListIterator<NodeDetails> nodeListIterator = tmpNodeDetailsList.listIterator();
+        System.out.println("1");
+
         while (nodeListIterator.hasNext()) {
+            System.out.println("2");
             NodeDetails currentNode = nodeListIterator.next();
+            System.out.println("3");
             while (currentNode.moreConnectionsAllowed(connectionRequirement)) {
-                int randomNum = HelperUtils.generateRandomNumber(0, tmpNodeDetailsList.size()-1);
-                NodeDetails connectingNode = nodeDetailsList.get(randomNum);
+                System.out.println("Size of node list ::   " + nodeDetailsList.size() );
+                System.out.println("4");
+//                int randomNum = HelperUtils.generateRandomNumber(0, tmpNodeDetailsList.size()-1);
+                System.out.println("5  - Random number "  + idx);
+                NodeDetails connectingNode = shuffledNodeDetails.get(idx);
+                System.out.println("6");
                 if(isNodeContactable(currentNode, connectingNode, connectionRequirement)) {
+                    System.out.println("7");
                     currentNode.addConnections(connectingNode);
+                    System.out.println("8");
+                }
+                idx++;
+                if(idx >= shuffledNodeDetails.size()) {
+                    idx = 0;
                 }
             }
         }
@@ -327,9 +345,11 @@ public class Registry extends AbstractNode implements Node {
 
     private boolean isNodeContactable(final NodeDetails source, final NodeDetails destination, final int connectionRequirement) {
         if (!destination.moreConnectionsAllowed(connectionRequirement)) {  /*Check Maximum connections reached.*/
+            System.out.println("DEBUG : max connection exceeded");
             return false;
         }
         if(source.getFormattedString().equals(destination.getFormattedString())) {  /*Connection to itself is not supported.*/
+            System.out.println("DEBUG : Node connection to itself");
             return false;
         }
         return !source.nodeAlreadyConnected(destination);  /*Connect if not already connected.*/

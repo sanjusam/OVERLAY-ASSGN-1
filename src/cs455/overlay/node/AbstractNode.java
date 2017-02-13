@@ -108,6 +108,8 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
             requestDeRegisterNode();
         } else if (eventType == EventType.EXIT_OVERLAY) {
             requestDeRegisterNode(); //TODO :: WHAT??
+        } else if (eventType == EventType.PRINT_SHORT_PATH) {
+            printShortestPath();
         }
     }
 

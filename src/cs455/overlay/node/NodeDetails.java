@@ -10,7 +10,7 @@ public class NodeDetails {
     private final int portNum;
     private final List<NodeDetails> myConnections = new ArrayList<>();
     private final List<NodeDetails> myRemoteConnections = new ArrayList<>(); // Keep tracks of the nodes that are connected to me.
-    private int allConnections  ; // This keeps tracks of all connection of the node, if it connects, or someone makes a connection.
+    private int allConnections = 0 ; // This keeps tracks of all connection of the node, if it connects, or someone makes a connection.
 
     public NodeDetails(final String nodeName, final int portNum) {
         this.portNum = portNum;
@@ -58,8 +58,8 @@ public class NodeDetails {
         return myConnections;
     }
 
-    public boolean moreConnectionsAllowed(final int connectionRequested) {
-        return allConnections < connectionRequested;
+    public boolean moreConnectionsAllowed(final int connectionRequirement) {
+        return allConnections < connectionRequirement;
     }
 
     public void incrementConnectionCount() {

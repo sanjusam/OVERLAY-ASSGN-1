@@ -24,6 +24,7 @@ public class MessagingNode extends AbstractNode {
     private long sumOfReceivedMessages = 0;
     private int numOfMessagesRelayed = 0;
     private boolean linkWeightsProcessed = false;
+    private boolean setupOverlayConnections = false;
     private ExtractLinkWeights extractLinkWeights = null;
     private List<RoutingCache> routingCacheList = null;
 
@@ -103,6 +104,7 @@ public class MessagingNode extends AbstractNode {
             }
         }
         System.out.println("All connections are established. Number of connections: " + connectionsMade);
+        setupOverlayConnections = true;
     }
 
     @Override
@@ -116,12 +118,6 @@ public class MessagingNode extends AbstractNode {
         final String me = myIpAddress + MessageConstants.NODE_PORT_SEPARATOR + myPortNum;
         extractLinkWeights = new ExtractLinkWeights(linkWeights.getLinkWeightList(), me);
         routingCacheList = extractLinkWeights.getRoutingForAllNodes();
-        System.out.println("Printing routing cache list for all nodes.");
-        for(final RoutingCache routingCache : routingCacheList) {
-            System.out.println("Source : " + routingCache.getSource() + " Destination  " + routingCache.getDestination()
-                    + " Path " + routingCache.getPath()  + " Next Hop " + routingCache.getNextHop());
-        }
-
         System.out.println("INFO : Link weights are received and processed. Ready to send messages.");  //TODO:: Process Weights
         linkWeightsProcessed = true;
     }
@@ -185,7 +181,7 @@ public class MessagingNode extends AbstractNode {
                             continue;
                         }
                     } else {
-                        System.out.println("ERROR : This should not have happened");
+                        System.out.println("ERROR : Missing connection information - All connections should have been established");
                     }
                 }
                 ++numOfMessagesSend;
@@ -213,9 +209,18 @@ public class MessagingNode extends AbstractNode {
         }
     }
 
-        @Override
+    @Override
     public void printShortestPath() {
-        //TODO :: Print shortest path
+        if(routingCacheList == null) {
+            System.out.println("ERROR : Link weights are not assigned to calculate the shortest path.");
+            return;
+        }
+        System.out.println("Printing routing cache list for all nodes.");
+        for(final RoutingCache routingCache : routingCacheList) {
+//            System.out.println("Source : " + routingCache.getSource() + " Destination  " + routingCache.getDestination()
+//                + " Path " + routingCache.getPath()  + " Next Hop " + routingCache.getNextHop());
+            System.out.println("Shortest Path : " + routingCache.getPath());
+        }
     }
 
     @Override
