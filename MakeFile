@@ -19,6 +19,7 @@ clean:
 	@rm  -rf ./cs455/overlay/wireformats/TrafficSummary.class
 	@rm  -rf ./cs455/overlay/wireformats/StartMessagingSignal.class
 	@rm  -rf ./cs455/overlay/wireformats/TransmitMessage.class
+	@rm  -rf ./cs455/overlay/wireformats/SendListeningPort.class
 	@rm  -rf ./cs455/overlay/node/AbstractNode.class
 	@rm  -rf ./cs455/overlay/node/MessagingNode.class
 	@rm  -rf ./cs455/overlay/node/CommandListener.class
@@ -62,6 +63,7 @@ compile:
 	@javac -d . ./src/cs455/overlay/wireformats/RegisterAcknowledgement.java
 	@javac -d . ./src/cs455/overlay/wireformats/StartMessagingSignal.java
 	@javac -d . ./src/cs455/overlay/wireformats/TransmitMessage.java
+	@javac -d . ./src/cs455/overlay/wireformats/SendListeningPort.java
 	@javac -d . ./src/cs455/overlay/node/Node.java
 	@javac -d . ./src/cs455/overlay/wireformats/EventFactory.java
 	@javac -d . ./src/cs455/overlay/dijkstra/ConceptualNode.java

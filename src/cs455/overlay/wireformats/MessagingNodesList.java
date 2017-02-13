@@ -16,7 +16,7 @@ public class MessagingNodesList extends AbstractEvent {
     private final String nodeDelimiter = "DELIM"; //TODO :: Find a better delimiter.
 
     private int numNodes;
-    private final List<String> messagingNodeList = new ArrayList<>();  //List of Strings pattern : Node_Name:portNum
+    private final List<String> messagingNodeList = new ArrayList<>();  //List of Strings pattern : Node_Name:myPortNum
 
     public MessagingNodesList(final int numNodes) {
         super(EventType.MESSAGING_NODES_LIST.getValue());

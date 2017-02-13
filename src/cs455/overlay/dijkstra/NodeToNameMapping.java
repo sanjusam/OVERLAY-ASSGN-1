@@ -23,7 +23,7 @@ public class NodeToNameMapping {
         return null;
     }
 
-    public int getNodeNameInNumber(final String nodeDetail) { // Should be passing in node:portNum format.
+    public int getNodeNameInNumber(final String nodeDetail) { // Should be passing in node:myPortNum format.
         return nodeDetailsMap.get(nodeDetail);
     }
 

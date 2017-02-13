@@ -163,11 +163,16 @@ public class Registry extends AbstractNode implements Node {
         ++taskCompleted;
 
         if(taskCompleted == nodeDetailsList.size()) {
-            System.out.println("SANJU :: Received task complete from all nodes. - Pulling Traffic summary");
+            System.out.println("INFO :: Received task complete from all nodes. - Pulling Traffic summary in 15 seconds");
             taskCompleted = 0;
+            try {
+                Thread.sleep(15000);
+            } catch (InterruptedException e) {
+                System.out.println("Received a Thread interrupted exception.");
+            }
             pullTrafficSummary();
         } else {
-            System.out.println("SANJU :: Waiting to receive Task Completed from all nodes " + taskCompleted +"/" + nodeDetailsList.size());
+            System.out.println("INFO :: Waiting to receive Task Completed from all nodes " + taskCompleted +"/" + nodeDetailsList.size());
         }
 
     }
@@ -195,6 +200,11 @@ public class Registry extends AbstractNode implements Node {
     }
 
     @Override
+    public void updateConnectionInfo(final SendListeningPort sendListeningPort, final Socket socket) {
+        System.out.println("INFO : Update connection info is not supported on registry");
+    }
+
+    @Override
     public synchronized void  printTrafficSummary(final TrafficSummary trafficSummary) {
         ++receivedTrafficStatsFromAllNodes;
         if(!printOnce) {
@@ -217,6 +227,7 @@ public class Registry extends AbstractNode implements Node {
             sumAllMessagesSent = 0;
             sumAllMessagesReceived = 0;
             printOnce = false;
+            receivedTrafficStatsFromAllNodes = 0;
         }
     }
 

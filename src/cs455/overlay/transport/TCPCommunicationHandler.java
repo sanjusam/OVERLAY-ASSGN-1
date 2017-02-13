@@ -8,9 +8,11 @@ import java.net.Socket;
 public class TCPCommunicationHandler {
     private TCPSender sender;
     private TCPReceiverThread receiver;
+    private Socket socket;
 
     public TCPCommunicationHandler(final Socket socket, final Node node) {
         try {
+            this.socket = socket;
             sender = new TCPSender(socket);
             receiver = new TCPReceiverThread(socket, node);
             final Thread receiverThread = new Thread(receiver);
@@ -30,6 +32,10 @@ public class TCPCommunicationHandler {
             ioe.printStackTrace();
             return  false;
         }
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 
 }

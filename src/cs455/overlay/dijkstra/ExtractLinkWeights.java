@@ -12,9 +12,11 @@ public class ExtractLinkWeights {
     private List<String> linkWeightList = new ArrayList<>();  // hostnameA:portnumA hostnameB:portnumB weight
     private final NodeToNameMapping nodeNameMapping = new NodeToNameMapping();
     private final List<RoutingCache> routingCacheList = new ArrayList<>();
+    private final String me;
 
     public ExtractLinkWeights(final List<String> linkWeightList, final String me) {
         this.linkWeightList = linkWeightList;
+        this.me = me;
         extractNodes();
         final int numExpressionOfMe = nodeNameMapping.getNodeNameInNumber(me);
         final ShortestPathGenerator shortestPathGenerator = new ShortestPathGenerator(linkWeightList.size(), numExpressionOfMe);
@@ -69,9 +71,10 @@ public class ExtractLinkWeights {
         }
     }
 
-    public ArrayList<String> getAllNodes() {
+    public ArrayList<String> getAllNodesExceptMe() {
         final List<String > nodesList = new ArrayList<>();
         nodesList.addAll(nodeNameMapping.getNodeDetails().keySet());
+        nodesList.remove(me);
         return (ArrayList<String>) nodesList;
     }
 

@@ -14,8 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractNode implements Node, ConnectionObserver {
-    public static int portNum;
-    public static String ipAddress;
+    public static int myPortNum;
+    public static String myIpAddress;
 
     final Map<String, TCPCommunicationHandler> communicationHandlerMap = new HashMap<>();
     TCPCommunicationHandler registerCommHandler;
@@ -42,7 +42,9 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
     @Override
     public TCPCommunicationHandler update(Socket socket) {
         final String hostName = HelperUtils.convertLoopBackToValidIpAddress(socket.getInetAddress().toString());
-        System.out.println("Adding the new connection....! " + hostName + "  " + socket.getPort());
+        System.out.println("Adding the new connection....! " + hostName + "  " + socket.getLocalPort());
+
+        System.out.println("\n\nSANJU : DEBUG Adding the new connection....! " + hostName + " GET-PORT " + socket.getPort() + " GET-LOCAL-PORT " + socket.getLocalPort() + "\n");
         TCPCommunicationHandler communicationHandler = new TCPCommunicationHandler(socket, this);
         addConnectionToPool(hostName + MessageConstants.NODE_PORT_SEPARATOR + socket.getPort(), communicationHandler); //TODO :: Check
         return communicationHandler;
@@ -74,6 +76,8 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
             printTrafficSummary((TrafficSummary) event);
         } else if(eventTypeReceived == EventType.MESSAGE_TRANSMIT.getValue()) {
             processReceivedMessage((TransmitMessage) event);
+        } else if(eventTypeReceived == EventType.SEND_LISTENING_PORT.getValue()) {
+            updateConnectionInfo((SendListeningPort) event, socket);
         }
 
     }
@@ -112,7 +116,7 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
 
 
     private void requestDeRegisterNode() {
-        final DeregisterRequest deregisterRequest = new DeregisterRequest(ipAddress, portNum);
+        final DeregisterRequest deregisterRequest = new DeregisterRequest(myIpAddress, myPortNum);
         try {
             sendMessageToRegistry(deregisterRequest.getBytes());
         } catch (IOException ioe ) {
@@ -141,7 +145,7 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         return true;
     }
 
-    protected void addConnectionToPool(final String key, final TCPCommunicationHandler communicationHandler) {
+    protected synchronized void addConnectionToPool(final String key, final TCPCommunicationHandler communicationHandler) {
         if(communicationHandlerMap.get(key) == null) {
             communicationHandlerMap.put(key, communicationHandler);
         } else {
@@ -149,8 +153,32 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         }
     }
 
-    protected TCPCommunicationHandler getConnectionFromPool(final String key) {
+    protected synchronized TCPCommunicationHandler getConnectionFromPool(final String key) {
         return communicationHandlerMap.get(key);
+    }
+
+    protected synchronized void updateConnectionInformation(final Socket socket, final int portNum) {
+        boolean updateNeeded = false;
+        String keyToUpdate = "";
+        TCPCommunicationHandler communicationHandlerToUpdate;
+        for (final String key : communicationHandlerMap.keySet()) {
+            final TCPCommunicationHandler communicationHandler = communicationHandlerMap.get(key);
+            if(socket == communicationHandler.getSocket()) {
+                updateNeeded = true;
+                keyToUpdate = key;
+                break;
+            }
+        }
+        if(updateNeeded) {
+            communicationHandlerToUpdate = communicationHandlerMap.get(keyToUpdate);
+            communicationHandlerMap.remove(keyToUpdate);
+            String newKey = keyToUpdate.split(MessageConstants.NODE_PORT_SEPARATOR)[0];
+            newKey += MessageConstants.NODE_PORT_SEPARATOR + portNum;
+            System.out.println("DEBUG : Updating the Listening port " + keyToUpdate + "   " + newKey); //TODO :: Remove
+            communicationHandlerMap.put(newKey, communicationHandlerToUpdate);
+        } else {
+            System.out.println("DEBUG : Did not find a key to update.... this shouldnt have happened."); //TODO :: Remove
+        }
     }
 
     protected void startCommandListener() {

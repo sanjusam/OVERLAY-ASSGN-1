@@ -30,11 +30,11 @@ public class MessagingNode extends AbstractNode {
     public static void main(String args[]) throws Exception {
         registryHost = args[0];
         registryPort = HelperUtils.getInt(args[1]);
-        ipAddress = Inet4Address.getLocalHost().getHostAddress();
+        myIpAddress = Inet4Address.getLocalHost().getHostAddress();
 
         MessagingNode messagingNode = new MessagingNode();
-        portNum = messagingNode.startTCPServerThread(-1);
-        messagingNode.registerMessagingNode(ipAddress, portNum);
+        myPortNum = messagingNode.startTCPServerThread(-1);
+        messagingNode.registerMessagingNode(myIpAddress, myPortNum);
         messagingNode.startCommandListener();
     }
 
@@ -93,8 +93,10 @@ public class MessagingNode extends AbstractNode {
             }
             try {
                 final Socket nodeConnection = new Socket(nodeName, portNum);
-                update(nodeConnection);  //TODO : Either use the return value or pick from the map.
+                TCPCommunicationHandler tcpCommunicationHandler = update(nodeConnection);  //TODO : Either use the return value or pick from the map.
                 ++connectionsMade;
+                final SendListeningPort listeningPortMsg = new SendListeningPort(myPortNum);
+                tcpCommunicationHandler.sendData(listeningPortMsg.getBytes());
             } catch (final IOException ioe) {
                 System.out.println("ERROR : IO Exception thrown while trying to establish connection to " + nodeSpec);
                 System.exit(-1);
@@ -104,8 +106,14 @@ public class MessagingNode extends AbstractNode {
     }
 
     @Override
+    public void updateConnectionInfo(final SendListeningPort sendListeningPort, final Socket socket) {
+        updateConnectionInformation(socket, sendListeningPort.getListeningPort());
+    }
+
+
+        @Override
     public void processLinkWeights(final LinkWeights linkWeights) {
-        final String me = ipAddress + MessageConstants.NODE_PORT_SEPARATOR + portNum;
+        final String me = myIpAddress + MessageConstants.NODE_PORT_SEPARATOR + myPortNum;
         extractLinkWeights = new ExtractLinkWeights(linkWeights.getLinkWeightList(), me);
         routingCacheList = extractLinkWeights.getRoutingForAllNodes();
         System.out.println("Printing routing cache list for all nodes.");
@@ -155,7 +163,7 @@ public class MessagingNode extends AbstractNode {
             return;
         }
 
-        final List<String > listOfNodes  = extractLinkWeights.getAllNodes() ;
+        final List<String > listOfNodes  = extractLinkWeights.getAllNodesExceptMe() ;
         //routingCacheList
 
         final int numRounds = Integer.parseInt(numRoundsStr);
@@ -190,14 +198,15 @@ public class MessagingNode extends AbstractNode {
 
     @Override
     public void processReceivedMessage(final TransmitMessage transmitMessage) {
-        System.out.println("INFO : Received Data transmission");
-        final String me = ipAddress + MessageConstants.NODE_PORT_SEPARATOR + portNum;
+        final String me = myIpAddress + MessageConstants.NODE_PORT_SEPARATOR + myPortNum;
         if(transmitMessage.getDestination().equals(me)) {  //This is the destination, update counters and drop the packet
             ++numOfMessagesReceived;
             sumOfReceivedMessages += transmitMessage.getMessageContent();
+            System.out.println("DEBUG : Dropping packet, it's for me.");   //TODO :: Remove
         } else { //Retransmit it!
             ++numOfMessagesRelayed;
             final String nodeToSend = transmitMessage.getDestination();
+            System.out.println("DEBUG : Relaying  to ."  + nodeToSend);  //TODO :: Remove
             final TCPCommunicationHandler communicationHandler = getNextHop(nodeToSend);
             try {
                 communicationHandler.sendData(transmitMessage.getBytes());
@@ -215,7 +224,7 @@ public class MessagingNode extends AbstractNode {
 
     @Override
     public void exitOverlay() {
-        DeregisterRequest deregisterRequest = new DeregisterRequest(ipAddress, portNum);
+        DeregisterRequest deregisterRequest = new DeregisterRequest(myIpAddress, myPortNum);
         try {
             sendMessageToRegistry(deregisterRequest.getBytes());
         } catch (IOException ioe ) {
@@ -238,8 +247,8 @@ public class MessagingNode extends AbstractNode {
 
         final TrafficSummary trafficSummary = new TrafficSummary();
         //TODO :: Build the Strings
-        trafficSummary.setIpAddress(ipAddress);
-        trafficSummary.setPortNum(portNum);
+        trafficSummary.setIpAddress(myIpAddress);
+        trafficSummary.setPortNum(myPortNum);
         trafficSummary.setNumOfMessagesSend(numOfMessagesSend);
         trafficSummary.setNumOfMessagesReceived(numOfMessagesReceived);
         trafficSummary.setSumOfReceivedMessages(sumOfReceivedMessages);
@@ -265,7 +274,7 @@ public class MessagingNode extends AbstractNode {
 
     private void updateRegistryOnTaskCompletion() {
         System.out.println("INFO : Sending Task Completed message to registry ");
-        final TaskComplete taskComplete = new TaskComplete(ipAddress, portNum);
+        final TaskComplete taskComplete = new TaskComplete(myIpAddress, myPortNum);
         try {
             registerCommHandler.sendData(taskComplete.getBytes());
         } catch (IOException ioe) {
@@ -274,6 +283,7 @@ public class MessagingNode extends AbstractNode {
     }
 
     private TCPCommunicationHandler getNextHop(final String node) {
+        System.out.println("DEBUG : Getting connection Details for  " + node);
         for (final RoutingCache routingCache : routingCacheList) {
             if (routingCache.getDestination().equals(node)) {
                 return communicationHandlerMap.get(routingCache.getNextHop());

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-public class ShortestPathGenerator {
+class ShortestPathGenerator {
     private int MAX_NODES;
     private int SOURCE;
 
@@ -59,14 +59,14 @@ public class ShortestPathGenerator {
         }
     }
 
-    public void addEdge(int sourceNode, int destinationNode, int weight) {
+    void addEdge(int sourceNode, int destinationNode, int weight) {
         if (sourceNode < MAX_NODES && destinationNode < MAX_NODES) {
             this.graph[sourceNode][destinationNode] = weight;
             this.graph[destinationNode][sourceNode] = weight;
         }
     }
 
-    public void buildPaths() {
+    void buildPaths() {
         Set<ConceptualNode> nodeSet = new HashSet<>();
         while (!minHeap.isEmpty()) {
             ConceptualNode closestNodeInTheMap = minHeap.remove();
@@ -97,7 +97,7 @@ public class ShortestPathGenerator {
         }
     }
 
-    public List<RoutingCache> generatePathForTraffic() {
+    List<RoutingCache> generatePathForTraffic() {
         final List<RoutingCache> routingForAllNodes = new ArrayList<>();
 
         for (int destinationNode = 0; destinationNode < MAX_NODES; destinationNode++) {

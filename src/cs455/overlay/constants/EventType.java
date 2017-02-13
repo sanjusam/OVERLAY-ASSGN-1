@@ -20,7 +20,8 @@ public enum EventType {
     PULL_TRAFFIC_SUMMARY(13, "pull-traffic-summary","pull-sum"),
     TRAFFIC_SUMMARY(14, "traffic-summary","traffic-sum"),
     TASK_INITIATE(15, "task-initiate","task-init"),
-    MESSAGE_TRANSMIT(16, "message-send", "msg-send");
+    MESSAGE_TRANSMIT(16, "message-send", "msg-send"),
+    SEND_LISTENING_PORT(17, "listen-port", "listen-port");
 
     private final int value;
     private final String longCommand;

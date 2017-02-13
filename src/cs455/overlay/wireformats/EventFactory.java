@@ -69,6 +69,8 @@ public class EventFactory {
             return new TrafficSummary(incomingBytes);
         } else if (eventTypeReceived ==  EventType.MESSAGE_TRANSMIT.getValue()) {
             return new TransmitMessage(incomingBytes);
+        } else if (eventTypeReceived ==  EventType.SEND_LISTENING_PORT.getValue()) {
+            return new SendListeningPort(incomingBytes);
         } else {
             System.out.println("Message Received : Undefined - add proper handling ");
             return new Default();  //TODO ::  Add all cases.

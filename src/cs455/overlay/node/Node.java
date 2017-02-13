@@ -23,6 +23,7 @@ public interface Node {
     void acknowledgeTaskComplete(final String node, final int port);
     void pullTrafficSummary();
     void printTrafficSummary(final TrafficSummary trafficSummary);
+    void updateConnectionInfo(final SendListeningPort sendListeningPort, final Socket socket);
     void printShortestPath();
     void exitOverlay();
 }
