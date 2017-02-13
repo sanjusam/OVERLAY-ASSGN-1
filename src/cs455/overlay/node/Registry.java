@@ -10,6 +10,7 @@ import cs455.overlay.constants.EventConstants;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -61,10 +62,8 @@ public class Registry extends AbstractNode implements Node {
             final MessagingNodesList messagingNodesList = allOverlays.get(nodeDetails);
             TCPCommunicationHandler communicationHandler = getConnectionFromPool(nodeDetails.getFormattedString());  /*Check if a connection is already created to the node, if not create on.*/
             if(communicationHandler == null) {
-                //TODO :: Create connection.
                 Socket socket= new Socket(nodeDetails.getNodeName(), nodeDetails.getPortNum());
                 communicationHandler = update(socket);
-                System.out.println("Sending Messaging Node List");
                 communicationHandler.sendData(messagingNodesList.getBytes());
             }
         }
@@ -81,7 +80,7 @@ public class Registry extends AbstractNode implements Node {
             TCPCommunicationHandler communicationHandler = getConnectionFromPool(nodeDetails.getFormattedString());  /*Check if a connection is already created to the node, if not create on.*/
             try {
                 if(communicationHandler == null) {
-                    System.out.println("Error : This case should not have happened");
+                    System.out.println("ERROR : This case should not have happened");
                     Socket socket= new Socket(nodeDetails.getNodeName(), nodeDetails.getPortNum());
                     communicationHandler = update(socket);
                 }
@@ -159,7 +158,6 @@ public class Registry extends AbstractNode implements Node {
 
     @Override
     public synchronized void acknowledgeTaskComplete(final String node, final int port) {
-        System.out.println(("INFO : Task Completed Acknowledged"));
         ++taskCompleted;
 
         if(taskCompleted == nodeDetailsList.size()) {
@@ -172,14 +170,12 @@ public class Registry extends AbstractNode implements Node {
             }
             pullTrafficSummary();
         } else {
-            System.out.println("INFO :: Waiting to receive Task Completed from all nodes " + taskCompleted +"/" + nodeDetailsList.size());
+            System.out.println("INFO :: Received Task Complete from " + taskCompleted +"/" + nodeDetailsList.size());
         }
-
     }
 
     @Override
     public void pullTrafficSummary() {  //TODO : Need to understand more.
-        System.out.println(("INFO : Task Completed Acknowledged - Pulling Traffic Summary"));
         final PullTrafficSummary pullTrafficSummary = new PullTrafficSummary();
         try {
             broadcastMessageToAllNodes(pullTrafficSummary.getBytes());
@@ -219,8 +215,11 @@ public class Registry extends AbstractNode implements Node {
 
         printData(trafficSummary);
         if(receivedTrafficStatsFromAllNodes == nodeDetailsList.size()) {
-            System.out.println("Sum \t" + numAllMessagesSent + "\t" + sumAllMessagesSent + "\t" + numAllMessagesReceived + "\t" + sumAllMessagesReceived);
-            System.out.println(markerSub);
+            Formatter formatter = new Formatter();
+            formatter.format("%-32s %-15d %-15d %-25d %-25d  ",
+                    "Sum", numAllMessagesSent, numAllMessagesReceived, sumAllMessagesSent, sumAllMessagesReceived);
+            System.out.println(markerMain);
+            System.out.println(formatter.toString());
             System.out.println(markerMain);
             numAllMessagesSent = 0;
             numAllMessagesReceived = 0;
@@ -232,9 +231,9 @@ public class Registry extends AbstractNode implements Node {
     }
 
     private void printHeader() {
-        final String header1 =   "\t    \t\t\tNumber              Number of                                                              Number of " ;
-        final String header2  =  "\t    \t\t\tof messages         messages       Summation of sent           Summation of received       messages" ;
-        final String header3 =   "\tNODE\t\t\tsent                received           messages                        messages            relayed";
+        final String header1 =   "\t    \t\t\tNumber          Number of                                                              Number of " ;
+        final String header2  =  "\t    \t\t\tof messages     messages       Summation of sent           Summation of received       messages" ;
+        final String header3 =   "\tNODE\t\t\tsent            received           messages                        messages            relayed";
 
         System.out.println(header1);
         System.out.println(header2);
@@ -271,8 +270,11 @@ public class Registry extends AbstractNode implements Node {
 
     private Map<NodeDetails, MessagingNodesList> buildOverlayNodes(final int connectionRequirement) {
         final Map<NodeDetails, MessagingNodesList> overlayList = new HashMap<>();
+        System.out.println("DEBUG : Building overlay on all peer nodes");
         buildPeerMessagingNodeOnAllNodes();  /*First builds overlay connection all nodes - to avoid network partitions. */
+        System.out.println("DEBUG : Building overlay RANDOM nodes");
         buildPeerMessagingNodesOnEachNode(connectionRequirement);  /*Build connections on the nodes */
+        System.out.println("DEBUG : DONE Building overlay");
         for(final NodeDetails nodeDetails : nodeDetailsList) {
             System.out.println("All Connections for node      " + nodeDetails.getFormattedString() + " " + nodeDetails.getAllConnections());
             System.out.println("Created Connections for node  " + nodeDetails.getFormattedString() + " " + nodeDetails.getConnections().size());
@@ -453,6 +455,6 @@ public class Registry extends AbstractNode implements Node {
         return ipAddressInSocket.equals(nodeIpAddress);
     }
 
-    private final String markerMain =  "\t\t=======================================================================================================";
-    private final String markerSub =  "\t\t-------------------------------------------------------------------------------------------------------";
+    private final String markerMain =  "\t\t\t=======================================================================================================";
+    private final String markerSub =   "\t\t\t-------------------------------------------------------------------------------------------------------";
 }

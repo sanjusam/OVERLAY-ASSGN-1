@@ -32,11 +32,9 @@ public class TCPServerThread implements ConnectionObservable, Runnable {
 
     @Override
     public void run() {
-        System.out.println("DEBUG : Starting connection listener");
         while (true) {
             try {
                 Socket socket = serverSocket.accept();
-                System.out.println("Incoming connection " + socket.getInetAddress().toString());
                 notifyListeners(socket);
             } catch (IOException e) {
                 e.printStackTrace();

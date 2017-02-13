@@ -10,19 +10,19 @@ import cs455.overlay.constants.EventType;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractNode implements Node, ConnectionObserver {
-    public static int myPortNum;
-    public static String myIpAddress;
+    static int myPortNum;
+    static String myIpAddress;
 
-    final Map<String, TCPCommunicationHandler> communicationHandlerMap = new HashMap<>();
+    final Map<String, TCPCommunicationHandler> communicationHandlerMap = new ConcurrentHashMap<>();
     TCPCommunicationHandler registerCommHandler;
-    protected boolean overlayConfigured = false;
-    protected boolean requestedToExitOverlay = false;
+    boolean overlayConfigured = false;
+    boolean requestedToExitOverlay = false;
 
-    protected int startTCPServerThread (final int portNum) throws IOException {
+    /*package */ int startTCPServerThread (final int portNum) throws IOException {
         /* 1. Starts up the server thread on the node on a random/specified port
            2. Registers this as a listener for all the incoming connection on the server thread.
            3. Returns the port num, useful when trying to start on a random port number.
@@ -42,11 +42,8 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
     @Override
     public TCPCommunicationHandler update(Socket socket) {
         final String hostName = HelperUtils.convertLoopBackToValidIpAddress(socket.getInetAddress().toString());
-        System.out.println("Adding the new connection....! " + hostName + "  " + socket.getLocalPort());
-
-        System.out.println("\n\nSANJU : DEBUG Adding the new connection....! " + hostName + " GET-PORT " + socket.getPort() + " GET-LOCAL-PORT " + socket.getLocalPort() + "\n");
         TCPCommunicationHandler communicationHandler = new TCPCommunicationHandler(socket, this);
-        addConnectionToPool(hostName + MessageConstants.NODE_PORT_SEPARATOR + socket.getPort(), communicationHandler); //TODO :: Check
+        addConnectionToPool(hostName + MessageConstants.NODE_PORT_SEPARATOR + socket.getPort(), communicationHandler);
         return communicationHandler;
     }
 
@@ -129,7 +126,7 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         requestDeRegisterNode();
     }
 
-    protected boolean validFirstArgument(final String commandToValidate, final int expectedParts, final boolean isNumeric) {
+    /*package */ boolean validFirstArgument(final String commandToValidate, final int expectedParts, final boolean isNumeric) {
         if(commandToValidate.split(" ").length < expectedParts) {
             System.out.println("The command " + commandToValidate.split(" ")[0] +" is expected to have argument[s]");
             return false;
@@ -145,7 +142,7 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         return true;
     }
 
-    protected synchronized void addConnectionToPool(final String key, final TCPCommunicationHandler communicationHandler) {
+    private void addConnectionToPool(final String key, final TCPCommunicationHandler communicationHandler) {
         if(communicationHandlerMap.get(key) == null) {
             communicationHandlerMap.put(key, communicationHandler);
         } else {
@@ -153,11 +150,11 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         }
     }
 
-    protected synchronized TCPCommunicationHandler getConnectionFromPool(final String key) {
+    /*package */ TCPCommunicationHandler getConnectionFromPool(final String key) {
         return communicationHandlerMap.get(key);
     }
 
-    protected synchronized void updateConnectionInformation(final Socket socket, final int portNum) {
+    void updateConnectionInformation(final Socket socket, final int portNum) {
         boolean updateNeeded = false;
         String keyToUpdate = "";
         TCPCommunicationHandler communicationHandlerToUpdate;
@@ -176,18 +173,16 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
             newKey += MessageConstants.NODE_PORT_SEPARATOR + portNum;
             System.out.println("DEBUG : Updating the Listening port " + keyToUpdate + "   " + newKey); //TODO :: Remove
             communicationHandlerMap.put(newKey, communicationHandlerToUpdate);
-        } else {
-            System.out.println("DEBUG : Did not find a key to update.... this shouldnt have happened."); //TODO :: Remove
         }
     }
 
-    protected void startCommandListener() {
+    /*package */ void startCommandListener() {
         final CommandListener commandListener = new CommandListener(this);
         final Thread commandListenerThread = new Thread(commandListener);
         commandListenerThread.start();
     }
 
-    protected boolean sendMessageToRegistry(byte [] bytesToSend) {
+    /*package */ boolean sendMessageToRegistry(byte [] bytesToSend) {
         return registerCommHandler.sendData(bytesToSend);
     }
 

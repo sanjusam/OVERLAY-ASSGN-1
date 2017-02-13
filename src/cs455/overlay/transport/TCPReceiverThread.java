@@ -22,7 +22,6 @@ public class TCPReceiverThread implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Initiating Data receiver " + socket.getInetAddress().toString() +"  " + socket.getPort() + " " + socket.getLocalPort());
         while (socket != null) {
             byte[] receivedData = receiveDataByte();
             eventProcessor.processReceivedEvent(receivedData, socket);

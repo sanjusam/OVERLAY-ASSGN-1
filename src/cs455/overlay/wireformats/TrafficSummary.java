@@ -123,8 +123,8 @@ public class TrafficSummary extends AbstractEvent {
 
     public String summaryFormatted () {
         Formatter formatter = new Formatter();
-        formatter.format("%-32s %-10d %-20d %-10d  %-20d  %-20d", ipAddress + ":" + portNum, numOfMessagesSend,
-                sumOfSendMessage, numOfMessagesReceived, sumOfReceivedMessages, numOfMessagesRelayed);
+        formatter.format("%-32s %-15d %-15d %-25d  %-25d  %-10d", ipAddress + ":" + portNum, numOfMessagesSend,
+                numOfMessagesReceived, sumOfSendMessage, sumOfReceivedMessages, numOfMessagesRelayed);
         return formatter.toString();
 
     }

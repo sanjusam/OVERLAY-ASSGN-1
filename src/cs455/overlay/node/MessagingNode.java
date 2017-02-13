@@ -19,13 +19,13 @@ public class MessagingNode extends AbstractNode {
     private static int registryPort;
 
     private int numOfMessagesSend = 0;
-    private long sumOfSendMessage = 100;
-    private int numOfMessagesReceived = 10;
-    private long sumOfReceivedMessages = 10;
+    private long sumOfSendMessage = 0;
+    private int numOfMessagesReceived = 0;
+    private long sumOfReceivedMessages = 0;
     private int numOfMessagesRelayed = 0;
     private boolean linkWeightsProcessed = false;
-    ExtractLinkWeights extractLinkWeights = null;
-    List<RoutingCache> routingCacheList = null;
+    private ExtractLinkWeights extractLinkWeights = null;
+    private List<RoutingCache> routingCacheList = null;
 
     public static void main(String args[]) throws Exception {
         registryHost = args[0];
@@ -175,7 +175,7 @@ public class MessagingNode extends AbstractNode {
                 int rndNodeToSend = HelperUtils.generateRandomNumber(0, listOfNodes.size() -1);
                 final String nodeToSend = listOfNodes.get(rndNodeToSend);
                 if(nodeToSend != null) {
-                    final TCPCommunicationHandler nextHopNodeConnection  = getNextHop(nodeToSend);
+                    final TCPCommunicationHandler nextHopNodeConnection  = getConnectionHandlerForNextHop(nodeToSend);
                     if(nextHopNodeConnection != null) {
                         final TransmitMessage message = new TransmitMessage(rndMessage, nodeToSend);
                         try {
@@ -188,7 +188,6 @@ public class MessagingNode extends AbstractNode {
                         System.out.println("ERROR : This should not have happened");
                     }
                 }
-
                 ++numOfMessagesSend;
                 sumOfSendMessage += rndMessage;
             }
@@ -197,22 +196,19 @@ public class MessagingNode extends AbstractNode {
     }
 
     @Override
-    public void processReceivedMessage(final TransmitMessage transmitMessage) {
+    public synchronized void processReceivedMessage(final TransmitMessage transmitMessage) {
         final String me = myIpAddress + MessageConstants.NODE_PORT_SEPARATOR + myPortNum;
         if(transmitMessage.getDestination().equals(me)) {  //This is the destination, update counters and drop the packet
             ++numOfMessagesReceived;
             sumOfReceivedMessages += transmitMessage.getMessageContent();
-            System.out.println("DEBUG : Dropping packet, it's for me.");   //TODO :: Remove
-        } else { //Retransmit it!
+        } else { //Retransmit the package!
             ++numOfMessagesRelayed;
             final String nodeToSend = transmitMessage.getDestination();
-            System.out.println("DEBUG : Relaying  to ."  + nodeToSend);  //TODO :: Remove
-            final TCPCommunicationHandler communicationHandler = getNextHop(nodeToSend);
+            final TCPCommunicationHandler communicationHandler = getConnectionHandlerForNextHop(nodeToSend);
             try {
                 communicationHandler.sendData(transmitMessage.getBytes());
             } catch (IOException ioe) {
                 System.out.println("Failed to send message");
-                return;
             }
         }
     }
@@ -244,9 +240,7 @@ public class MessagingNode extends AbstractNode {
 
     @Override
     public void pullTrafficSummary() {
-
         final TrafficSummary trafficSummary = new TrafficSummary();
-        //TODO :: Build the Strings
         trafficSummary.setIpAddress(myIpAddress);
         trafficSummary.setPortNum(myPortNum);
         trafficSummary.setNumOfMessagesSend(numOfMessagesSend);
@@ -282,9 +276,8 @@ public class MessagingNode extends AbstractNode {
         }
     }
 
-    private TCPCommunicationHandler getNextHop(final String node) {
-        System.out.println("DEBUG : Getting connection Details for  " + node);
-        for (final RoutingCache routingCache : routingCacheList) {
+    private TCPCommunicationHandler getConnectionHandlerForNextHop(final String node) {
+                for (final RoutingCache routingCache : routingCacheList) {
             if (routingCache.getDestination().equals(node)) {
                 return communicationHandlerMap.get(routingCache.getNextHop());
             }

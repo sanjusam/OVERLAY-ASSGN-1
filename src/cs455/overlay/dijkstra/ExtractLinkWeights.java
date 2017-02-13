@@ -19,7 +19,7 @@ public class ExtractLinkWeights {
         this.me = me;
         extractNodes();
         final int numExpressionOfMe = nodeNameMapping.getNodeNameInNumber(me);
-        final ShortestPathGenerator shortestPathGenerator = new ShortestPathGenerator(linkWeightList.size(), numExpressionOfMe);
+        final ShortestPathGenerator shortestPathGenerator = new ShortestPathGenerator(nodeNameMapping.getNodeDetails().size(), numExpressionOfMe);
         sendEdgeWeightsForCalculation(shortestPathGenerator);
         generatePathsForTraffic(shortestPathGenerator);
     }
