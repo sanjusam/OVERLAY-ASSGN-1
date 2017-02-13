@@ -315,7 +315,6 @@ public class Registry extends AbstractNode implements Node {
         final List<NodeDetails> tmpNodeDetailsList  = nodeDetailsList;
         final List <NodeDetails> shuffledNodeDetails = nodeDetailsList;
 //        Collections.shuffle(shuffledNodeDetails);
-        int idx = 0;
         ListIterator<NodeDetails> nodeListIterator = tmpNodeDetailsList.listIterator();
         System.out.println("1");
 
@@ -325,6 +324,7 @@ public class Registry extends AbstractNode implements Node {
             System.out.println("3");
             while (currentNode.moreConnectionsAllowed(connectionRequirement)) {
                 System.out.println("Size of node list ::   " + nodeDetailsList.size() );
+                int idx = 0;
                 System.out.println("4");
 //                int randomNum = HelperUtils.generateRandomNumber(0, tmpNodeDetailsList.size()-1);
                 System.out.println("5  - Random number "  + idx);
@@ -337,7 +337,7 @@ public class Registry extends AbstractNode implements Node {
                 }
                 idx++;
                 if(idx >= shuffledNodeDetails.size()) {
-                    idx = 0;
+                    break;
                 }
             }
         }
