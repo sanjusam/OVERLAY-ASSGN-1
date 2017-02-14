@@ -14,7 +14,8 @@ public class MessageConstants {
 
     public static final String INVALID_PORT_START_FAILURE = "Cannot Start registry - Invalid port number for registry";
     public static final String NODE_PORT_SEPARATOR = ":";
-    public static final String NODE_PATH_SEPARATOR = "->";
+    public static final String NODE_PATH_SEPARATOR = " -- ";
     public static final String markerMain =  "\t\t\t=======================================================================================================";
     public static final String markerSub =   "\t\t\t-------------------------------------------------------------------------------------------------------";
+    public static int MAX_MESSAGES_PER_ROUND = 5;
 }

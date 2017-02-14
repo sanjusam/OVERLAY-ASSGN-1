@@ -27,7 +27,7 @@ public class TCPReceiverThread implements Runnable {
             if(receivedData != null) {
                 eventProcessor.processReceivedEvent(receivedData, socket);
             } else {
-                System.exit(0);  //No point in running the thread, if the socket is closed
+                break;  //No point in running the thread, if the socket is closed
             }
         }
     }
@@ -40,7 +40,6 @@ public class TCPReceiverThread implements Runnable {
             dataInputStream.readFully(data, 0, dataLength);
             return data;
         } catch (IOException ioe) {
-            System.out.println("INFO : Communication socket closed");
             return  null;
         }
     }

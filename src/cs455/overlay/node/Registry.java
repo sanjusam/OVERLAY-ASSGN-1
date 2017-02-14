@@ -10,6 +10,7 @@ import cs455.overlay.constants.EventConstants;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +69,19 @@ public class Registry extends AbstractNode implements Node {
             }
         }
         overlayConfigured = true;
+    }
+
+    @Override
+    public void forceExit() {
+        final ForceExit forceExit = new ForceExit();
+        System.out.println("INFO : Sending all nodes to exit the application");
+        try {
+            broadcastMessageToAllNodes(forceExit.getBytes());
+        } catch (IOException  ioe) {
+            System.out.println("ERROR : Unable to send force exit message" );
+        }
+        System.out.println("INFO : Exiting the application");
+        System.exit(0);
     }
 
     @Override
@@ -308,7 +322,7 @@ public class Registry extends AbstractNode implements Node {
         /*Check capacity of each nodes and creates links for each node.*/
         final List <NodeDetails> shuffledNodeDetails = new ArrayList<>(nodeDetailsList);
         ListIterator<NodeDetails> nodeListIterator = nodeDetailsList.listIterator();
-
+        Collections.shuffle(shuffledNodeDetails);
         while (nodeListIterator.hasNext()) {
             NodeDetails currentNode = nodeListIterator.next();
             int idx = 0;
@@ -402,10 +416,12 @@ public class Registry extends AbstractNode implements Node {
 
     private void removeNodeFromList(final String nodeIpAddres, final int portNum) {
         int indexForRemoval = -1;
-        for (final NodeDetails nodeDetails : nodeDetailsList)
-            if (portNum == nodeDetails.getPortNum() || nodeIpAddres.equals(nodeDetails.getNodeName())) {
+        for (final NodeDetails nodeDetails : nodeDetailsList) {
+            if (portNum == nodeDetails.getPortNum() && nodeIpAddres.equals(nodeDetails.getNodeName())) {
                 indexForRemoval = nodeDetailsList.indexOf(nodeDetails);
+                break;
             }
+        }
         if (indexForRemoval != -1) {
             nodeDetailsList.remove(indexForRemoval);
         }

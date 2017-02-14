@@ -22,7 +22,8 @@ public enum EventType {
     TASK_INITIATE(15, "task-initiate","task-init"),
     MESSAGE_TRANSMIT(16, "message-send", "msg-send"),
     SEND_LISTENING_PORT(17, "listen-port", "listen-port"),
-    REGISTER_NODE(18, "register", "reg");
+    REGISTER_NODE(18, "register", "reg"),
+    FORCE_EXIT_EVERYONE(19, "quit", "quit");
 
     private final int value;
     private final String longCommand;

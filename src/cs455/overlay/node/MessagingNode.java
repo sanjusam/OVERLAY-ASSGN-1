@@ -24,7 +24,8 @@ public class MessagingNode extends AbstractNode {
     private long sumOfReceivedMessages = 0;
     private int numOfMessagesRelayed = 0;
     private boolean linkWeightsProcessed = false;
-    private boolean setupOverlayConnections = false;
+    private int potentialNumPacketsSend = 0;
+    private boolean pullSummaryRequestReceived = false;
     private ExtractLinkWeights extractLinkWeights = null;
     private List<RoutingCache> routingCacheList = null;
 
@@ -65,26 +66,6 @@ public class MessagingNode extends AbstractNode {
 
 
     @Override
-    public void registerNode(final RegisterRequest registerRequestEvent, final Socket socket) {
-        System.out.println("INFO : Register node is not supported on a messaging node.");
-    }
-
-    @Override
-    public void deRegisterNode(final DeregisterRequest deregisterRequest, final Socket socket) {
-        System.out.println("INFO : Register node is not supported on a messaging node.");
-    }
-
-    @Override
-    public void setupOverlay(final String command) throws IOException {
-        System.out.println("INFO : Setup Overlay not supported on a messaging node.");
-    }
-
-    @Override
-    public void sendLinkWeight() {
-        System.out.println("INFO : Sending Link weights is not supported on Messaging Node.!");
-    }
-
-    @Override
     public void makeConnectionsOnOverLayNodes(final MessagingNodesList nodesList) {
         /*Walk through the all the messaging node, create connection and listen to the incoming connections.*/
         if(nodesList.getNumNodes()== 0) {
@@ -116,7 +97,6 @@ public class MessagingNode extends AbstractNode {
             }
         }
         System.out.println("All connections are established. Number of connections: " + connectionsMade);
-        setupOverlayConnections = true;
     }
 
     @Override
@@ -125,23 +105,13 @@ public class MessagingNode extends AbstractNode {
     }
 
 
-        @Override
+    @Override
     public void processLinkWeights(final LinkWeights linkWeights) {
         final String me = myIpAddress + MessageConstants.NODE_PORT_SEPARATOR + myPortNum;
         extractLinkWeights = new ExtractLinkWeights(linkWeights.getLinkWeightList(), me);
         routingCacheList = extractLinkWeights.getRoutingForAllNodes();
         System.out.println("INFO : Link weights are received and processed. Ready to send messages.");
         linkWeightsProcessed = true;
-    }
-
-    @Override
-    public void listMessagingNodes() {
-        System.out.println("INFO : Listing Messaging node is not supported on Messaging Node.!");
-    }
-
-    @Override
-    public void listEdgeWeight() {
-        System.out.println("INFO : Listing Edge weight is not supported on Messaging Node.!");
     }
 
     @Override
@@ -166,10 +136,6 @@ public class MessagingNode extends AbstractNode {
         }
     }
 
-    @Override
-    public void initiateMessagingSignalForNodes(final String numRoundsStr) {
-        System.out.println("INFO : Init Signal for messaging is not supported on messaging node");
-    }
 
     @Override
     public void startMessaging(final String numRoundsStr) {
@@ -180,13 +146,16 @@ public class MessagingNode extends AbstractNode {
 
         final List<String > listOfNodes  = extractLinkWeights.getAllNodesExceptMe() ;
         //routingCacheList
-
+        potentialNumPacketsSend  = numOfMessagesSend * MessageConstants.MAX_MESSAGES_PER_ROUND ;
         final int numRounds = Integer.parseInt(numRoundsStr);
-        final int MAX_MESSAGES_PER_ROUND = 5;
         System.out.println("Messaging Starts");
         for(int numSend = 0 ; numSend < numRounds; ++numSend) {
-            for(int messagesPerRound = 0 ; messagesPerRound < MAX_MESSAGES_PER_ROUND ; messagesPerRound++) {
-                int rndMessage = HelperUtils.generateRandomNumber(1, 2147483647);  //TODO handle negative random number.
+            for(int messagesPerRound = 0 ; messagesPerRound < MessageConstants.MAX_MESSAGES_PER_ROUND ; messagesPerRound++) {
+                int rndMessage = HelperUtils.generateRandomNumber(1, 2147483647);
+                int factor = HelperUtils.generateRandomNumber(1, 5);
+                if(factor%2 == 0) {  // Just to get a negative number randomly.
+                    rndMessage = rndMessage * -1 ;
+                }
                 int rndNodeToSend = HelperUtils.generateRandomNumber(0, listOfNodes.size() -1);
                 final String nodeToSend = listOfNodes.get(rndNodeToSend);
                 if(nodeToSend != null) {
@@ -219,13 +188,31 @@ public class MessagingNode extends AbstractNode {
         } else { //Retransmit the package!
             ++numOfMessagesRelayed;
             final String nodeToSend = transmitMessage.getDestination();
-            final TCPCommunicationHandler communicationHandler = getConnectionHandlerForNextHop(nodeToSend);
+            final TCPCommunicationHandler connectionHandlerForNextHop = getConnectionHandlerForNextHop(nodeToSend);
             try {
-                communicationHandler.sendData(transmitMessage.getBytes());
+                connectionHandlerForNextHop.sendData(transmitMessage.getBytes());
             } catch (IOException ioe) {
-                System.out.println("Failed to send message");
+                System.out.println("INFO : Failed to send message");
             }
         }
+        if(numOfMessagesReceived < potentialNumPacketsSend  && pullSummaryRequestReceived) {
+            System.out.println("WARNING !!!! : Pull Traffic Summary Request received before all the packets are received " + numOfMessagesReceived +"/" + potentialNumPacketsSend );
+        }
+        if(numOfMessagesReceived == potentialNumPacketsSend) {
+            System.out.println("DEBUG : All packets received");
+        }
+    }
+
+    @Override
+    public void forceExit() {
+        final ForceExit forceExit = new ForceExit();
+        try {
+            sendMessageToRegistry(forceExit.getBytes());
+        } catch (IOException ioe) {
+            System.out.println("ERROR : Unable to send force exit message to registry");
+        }
+        System.out.println("INFO : Exiting the application");
+        System.exit(0);
     }
 
     @Override
@@ -236,8 +223,6 @@ public class MessagingNode extends AbstractNode {
         }
         System.out.println("Printing routing cache list for all nodes.");
         for(final RoutingCache routingCache : routingCacheList) {
-//            System.out.println("Source : " + routingCache.getSource() + " Destination  " + routingCache.getDestination()
-//                + " Path " + routingCache.getPath()  + " Next Hop " + routingCache.getNextHop());
             System.out.println("Shortest Path : " + routingCache.getPath());
         }
     }
@@ -254,17 +239,8 @@ public class MessagingNode extends AbstractNode {
     }
 
     @Override
-    public void acknowledgeTaskComplete(final String node, final int port) {
-        System.out.println("INFO : Task Completed Acknowledge is not supported on messaging node");
-    }
-
-    @Override
-    public void printTrafficSummary(final TrafficSummary trafficSummary) {
-        System.out.println(("INFO : Print Traffic summary is not supported on messaging node"));
-    }
-
-    @Override
     public void pullTrafficSummary() {
+        pullSummaryRequestReceived = true;
         final TrafficSummary trafficSummary = new TrafficSummary();
         trafficSummary.setIpAddress(myIpAddress);
         trafficSummary.setPortNum(myPortNum);
@@ -283,14 +259,6 @@ public class MessagingNode extends AbstractNode {
         }
     }
 
-    private void clearMessageCounters() {
-        numOfMessagesSend = 0;
-        numOfMessagesReceived = 0;
-        sumOfReceivedMessages = 0;
-        sumOfSendMessage = 0;
-        numOfMessagesRelayed = 0;
-    }
-
     private void updateRegistryOnTaskCompletion() {
         System.out.println("INFO : Sending Task Completed message to registry ");
         final TaskComplete taskComplete = new TaskComplete(myIpAddress, myPortNum);
@@ -302,11 +270,67 @@ public class MessagingNode extends AbstractNode {
     }
 
     private TCPCommunicationHandler getConnectionHandlerForNextHop(final String node) {
-                for (final RoutingCache routingCache : routingCacheList) {
+        for (final RoutingCache routingCache : routingCacheList) {
             if (routingCache.getDestination().equals(node)) {
                 return communicationHandlerMap.get(routingCache.getNextHop());
             }
         }
         return null;
+    }
+
+    private void clearMessageCounters() {
+        numOfMessagesSend = 0;
+        numOfMessagesReceived = 0;
+        sumOfReceivedMessages = 0;
+        sumOfSendMessage = 0;
+        numOfMessagesRelayed = 0;
+        pullSummaryRequestReceived = false;
+        potentialNumPacketsSend = 0;
+    }
+
+
+    @Override
+    public void acknowledgeTaskComplete(final String node, final int port) {
+        System.out.println("INFO : Task Completed Acknowledge is not supported on messaging node");
+    }
+
+    @Override
+    public void printTrafficSummary(final TrafficSummary trafficSummary) {
+        System.out.println(("INFO : Print Traffic summary is not supported on messaging node"));
+    }
+
+    @Override
+    public void initiateMessagingSignalForNodes(final String numRoundsStr) {
+        System.out.println("INFO : Init Signal for messaging is not supported on messaging node");
+    }
+
+    @Override
+    public void listMessagingNodes() {
+        System.out.println("INFO : Listing Messaging node is not supported on Messaging Node.!");
+    }
+
+    @Override
+    public void listEdgeWeight() {
+        System.out.println("INFO : Listing Edge weight is not supported on Messaging Node.!");
+    }
+
+    @Override
+    public void registerNode(final RegisterRequest registerRequestEvent, final Socket socket) {
+        System.out.println("INFO : Register node is not supported on a messaging node.");
+    }
+
+    @Override
+    public void deRegisterNode(final DeregisterRequest deregisterRequest, final Socket socket) {
+        System.out.println("INFO : Register node is not supported on a messaging node.");
+    }
+
+    @Override
+    public void setupOverlay(final String command) throws IOException {
+        System.out.println("INFO : Setup Overlay not supported on a messaging node.");
+    }
+
+    @Override
+    public void sendLinkWeight() {
+        System.out.println("INFO : Sending Link weights is not supported on Messaging Node.!");
     }
 }

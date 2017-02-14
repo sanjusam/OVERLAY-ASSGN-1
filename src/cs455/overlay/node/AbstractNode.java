@@ -75,6 +75,8 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
             processReceivedMessage((TransmitMessage) event);
         } else if(eventTypeReceived == EventType.SEND_LISTENING_PORT.getValue()) {
             updateConnectionInfo((SendListeningPort) event, socket);
+        } else if(eventTypeReceived == EventType.FORCE_EXIT_EVERYONE.getValue()) {
+            forceExit();
         }
 
     }
@@ -112,14 +114,11 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
             printShortestPath();
         } else if(eventType == EventType.REGISTER_NODE) {
             checkCommandOptionsAndSendToProcesses(command, true);
+        } else if(eventType == EventType.FORCE_EXIT_EVERYONE) {
+            forceExit();
         }
     }
 
-
-    private void requestExitOverlay() {
-        requestedToExitOverlay = true;
-        requestDeRegister(myIpAddress, myPortNum);
-    }
 
     void checkCommandOptionsAndSendToProcesses(final String command, final boolean register) {
         String parts[] = command.split(" ");
@@ -213,6 +212,5 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
     /*package */ boolean sendMessageToRegistry(byte [] bytesToSend) {
         return registerCommHandler.sendData(bytesToSend);
     }
-
 
 }

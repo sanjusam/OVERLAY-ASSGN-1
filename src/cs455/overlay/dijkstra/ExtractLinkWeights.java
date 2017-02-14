@@ -54,8 +54,12 @@ public class ExtractLinkWeights {
         boolean trim  = false;
         for(final String node : listOfNodes.split(MessageConstants.NODE_PATH_SEPARATOR)) {
             if(node != null && !node.isEmpty()) {
-                translatedNode += nodeNameMapping.getNode(HelperUtils.getInt(node)) + MessageConstants.NODE_PATH_SEPARATOR;
-                trim = true;
+                if(node.contains("[") && node.contains("]")) {
+                    translatedNode += node +  MessageConstants.NODE_PATH_SEPARATOR;  // Dont
+                } else {
+                    translatedNode += nodeNameMapping.getNode(HelperUtils.getInt(node.trim())) + MessageConstants.NODE_PATH_SEPARATOR;
+                    trim = true;
+                }
             }
         }
         return (trim)

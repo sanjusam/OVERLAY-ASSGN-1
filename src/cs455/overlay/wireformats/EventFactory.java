@@ -71,6 +71,8 @@ public class EventFactory {
             return new TransmitMessage(incomingBytes);
         } else if (eventTypeReceived ==  EventType.SEND_LISTENING_PORT.getValue()) {
             return new SendListeningPort(incomingBytes);
+        } else if (eventTypeReceived ==  EventType.FORCE_EXIT_EVERYONE.getValue()) {
+            return new ForceExit(incomingBytes);
         } else {
             System.out.println("Message Received : Undefined - add proper handling ");
             return new Default();

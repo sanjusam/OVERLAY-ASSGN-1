@@ -1,6 +1,8 @@
 package cs455.overlay.dijkstra;
 
 
+import cs455.overlay.constants.MessageConstants;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -112,10 +114,20 @@ class ShortestPathGenerator {
                     node = nodes[node.getParent()];
                     routingCache.setNextHop(Integer.toString(node.getId()));
                 }
+                int parentNode = SOURCE;
+                boolean printNode = true;
+                String path = "";
                 while (!stack.isEmpty()) {
                     Integer id = stack.removeFirst();
-                    routingCache.addToPath(id.toString());
+                    if(printNode) {
+                        path += " " + parentNode + MessageConstants.NODE_PATH_SEPARATOR +" [" + graph[parentNode][id] + "] " + MessageConstants.NODE_PATH_SEPARATOR + id;
+                        printNode = false;
+                    } else {
+                        path+= MessageConstants.NODE_PATH_SEPARATOR + " [" + graph[parentNode][id] + "] " + MessageConstants.NODE_PATH_SEPARATOR + id;
+                    }
+                    parentNode = id;
                 }
+                routingCache.addToPath(path);
                 routingForAllNodes.add(routingCache);
             }
         }

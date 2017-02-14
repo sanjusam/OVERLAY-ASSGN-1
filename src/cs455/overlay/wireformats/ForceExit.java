@@ -10,13 +10,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class ExitOverlay extends AbstractEvent {
-
-    public ExitOverlay() {
-        super(EventType.EXIT_OVERLAY.getValue());
+public class ForceExit extends AbstractEvent {
+    public ForceExit() {
+        super(EventType.FORCE_EXIT_EVERYONE.getValue());
     }
 
-    @Override
     public byte[] getBytes() throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
@@ -28,7 +26,7 @@ public class ExitOverlay extends AbstractEvent {
         return marshalledBytes;
     }
 
-    public ExitOverlay(byte[] marshalledBytes) throws IOException {
+    public ForceExit(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
         type = dataInputStream.readInt();

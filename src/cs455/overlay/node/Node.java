@@ -28,4 +28,5 @@ public interface Node {
     void updateConnectionInfo(final SendListeningPort sendListeningPort, final Socket socket);
     void printShortestPath();
     void exitOverlay();
+    void forceExit();
 }
