@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessagingNodesList extends AbstractEvent {
-    private final String nodeDelimiter = "DELIM"; //TODO :: Find a better delimiter.
+    private final String nodeDelimiter = "DELIM";
 
     private int numNodes;
     private final List<String> messagingNodeList = new ArrayList<>();  //List of Strings pattern : Node_Name:myPortNum

@@ -40,11 +40,11 @@ public class MessagingNode extends AbstractNode {
     }
 
     @Override
-    public void initiateNodeRegistration(final String myHostName, final int myPortNum) {  // TODO :: Connection could be singleton.
+    public void initiateNodeRegistration(final String myHostName, final int myPortNum) {
         try {
             System.out.println("INFO : Send registration request to the registry!");
             Socket connectionToRegistry = new Socket(registryHost, registryPort);
-            registerCommHandler = update(connectionToRegistry);  //TODO : Either use the return value or pick from the map. -- CAN this is extracted out??
+            registerCommHandler = update(connectionToRegistry);
             final Event registerEvent = new RegisterRequest(myHostName, myPortNum);
             registerCommHandler.sendData(registerEvent.getBytes());
         } catch (IOException ioe) {
@@ -106,7 +106,7 @@ public class MessagingNode extends AbstractNode {
             }
             try {
                 final Socket nodeConnection = new Socket(nodeName, portNum);
-                TCPCommunicationHandler tcpCommunicationHandler = update(nodeConnection);  //TODO : Either use the return value or pick from the map.
+                TCPCommunicationHandler tcpCommunicationHandler = update(nodeConnection);
                 ++connectionsMade;
                 final SendListeningPort listeningPortMsg = new SendListeningPort(myPortNum);
                 tcpCommunicationHandler.sendData(listeningPortMsg.getBytes());
@@ -130,7 +130,7 @@ public class MessagingNode extends AbstractNode {
         final String me = myIpAddress + MessageConstants.NODE_PORT_SEPARATOR + myPortNum;
         extractLinkWeights = new ExtractLinkWeights(linkWeights.getLinkWeightList(), me);
         routingCacheList = extractLinkWeights.getRoutingForAllNodes();
-        System.out.println("INFO : Link weights are received and processed. Ready to send messages.");  //TODO:: Process Weights
+        System.out.println("INFO : Link weights are received and processed. Ready to send messages.");
         linkWeightsProcessed = true;
     }
 
@@ -183,7 +183,7 @@ public class MessagingNode extends AbstractNode {
 
         final int numRounds = Integer.parseInt(numRoundsStr);
         final int MAX_MESSAGES_PER_ROUND = 5;
-        System.out.println("Messaging Starts");  //TODO :: Pick node to send message.
+        System.out.println("Messaging Starts");
         for(int numSend = 0 ; numSend < numRounds; ++numSend) {
             for(int messagesPerRound = 0 ; messagesPerRound < MAX_MESSAGES_PER_ROUND ; messagesPerRound++) {
                 int rndMessage = HelperUtils.generateRandomNumber(1, 2147483647);  //TODO handle negative random number.

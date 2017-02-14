@@ -13,7 +13,7 @@ public class EventFactory {
     private static EventFactory INSTANCE = new EventFactory();
     private Node node = null;
 
-    public synchronized void injectNode (final Node node) {  //TODO :: Factory Pattern ??
+    public synchronized void injectNode (final Node node) {
         if(node != null) {
             this.node = node;
         }
@@ -22,13 +22,13 @@ public class EventFactory {
         return INSTANCE;
     }
 
-    public void processReceivedEvent(final byte[] receivedStream, final Socket socket) {
+    public synchronized void processReceivedEvent(final byte[] receivedStream, final Socket socket) {
         try {
             final Event event = generateEventFromBytes(receivedStream);
             processEvent(event, socket);
         } catch (final IOException ioe) {
             System.out.println("Exiting : Error in generating Event from Stream.. Exiting");
-            ioe.printStackTrace();  //TODO :: Should I exit or keep going??
+            ioe.printStackTrace();
             System.exit(-1);
         }
 
@@ -73,7 +73,7 @@ public class EventFactory {
             return new SendListeningPort(incomingBytes);
         } else {
             System.out.println("Message Received : Undefined - add proper handling ");
-            return new Default();  //TODO ::  Add all cases.
+            return new Default();
         }
     }
 }

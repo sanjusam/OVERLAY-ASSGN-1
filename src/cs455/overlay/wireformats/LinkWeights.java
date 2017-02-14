@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LinkWeights extends AbstractEvent {
-    private final String nodeDelimiter = "DELIM"; //TODO :: Find a better delimiter.
+    private final String nodeDelimiter = "DELIM";
     private int numLinks;
     private List<String> linkWeightList = new ArrayList<>();  // hostnameA:portnumA hostnameB:portnumB weight
 

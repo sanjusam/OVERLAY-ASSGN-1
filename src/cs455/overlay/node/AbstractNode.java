@@ -107,7 +107,7 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         } else if (eventType == EventType.DEREGISTER_REQUEST) {
             checkCommandOptionsAndSendToProcesses(command, false);
         } else if (eventType == EventType.EXIT_OVERLAY) {
-            exitOverlay(); //TODO :: WHAT??
+            exitOverlay();
         } else if (eventType == EventType.PRINT_SHORT_PATH) {
             printShortestPath();
         } else if(eventType == EventType.REGISTER_NODE) {
@@ -200,7 +200,6 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
             communicationHandlerMap.remove(keyToUpdate);
             String newKey = keyToUpdate.split(MessageConstants.NODE_PORT_SEPARATOR)[0];
             newKey += MessageConstants.NODE_PORT_SEPARATOR + portNum;
-            System.out.println("DEBUG : Updating the Listening port " + keyToUpdate + "   " + newKey); //TODO :: Remove
             communicationHandlerMap.put(newKey, communicationHandlerToUpdate);
         }
     }

@@ -175,7 +175,7 @@ public class Registry extends AbstractNode implements Node {
     }
 
     @Override
-    public void pullTrafficSummary() {  //TODO : Need to understand more.
+    public void pullTrafficSummary() {
         final PullTrafficSummary pullTrafficSummary = new PullTrafficSummary();
         try {
             broadcastMessageToAllNodes(pullTrafficSummary.getBytes());

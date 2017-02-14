@@ -10,7 +10,7 @@ public class CommandListener implements Runnable {
 
     CommandListener(final Node node) {
         this.node = node;
-        this.promptString = "Enter the command :  # ";  //TODO :: Deal with prompt later
+        this.promptString = "Enter the command :  # ";
     }
 
     @Override
