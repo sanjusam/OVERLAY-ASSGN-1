@@ -35,13 +35,15 @@ public class MessagingNode extends AbstractNode {
 
         MessagingNode messagingNode = new MessagingNode();
         myPortNum = messagingNode.startTCPServerThread(-1);
-        messagingNode.registerMessagingNode(myIpAddress, myPortNum);
+        messagingNode.initiateNodeRegistration(myIpAddress, myPortNum);
         messagingNode.startCommandListener();
     }
 
-    private void registerMessagingNode(final String myHostName, final int myPortNum) {  // TODO :: Connection could be singleton.
+    @Override
+    public void initiateNodeRegistration(final String myHostName, final int myPortNum) {  // TODO :: Connection could be singleton.
         try {
-            Socket connectionToRegistry;connectionToRegistry = new Socket(registryHost, registryPort);
+            System.out.println("INFO : Send registration request to the registry!");
+            Socket connectionToRegistry = new Socket(registryHost, registryPort);
             registerCommHandler = update(connectionToRegistry);  //TODO : Either use the return value or pick from the map. -- CAN this is extracted out??
             final Event registerEvent = new RegisterRequest(myHostName, myPortNum);
             registerCommHandler.sendData(registerEvent.getBytes());
@@ -49,8 +51,18 @@ public class MessagingNode extends AbstractNode {
             System.out.println("ERROR : Exiting Unable to initiate connection to registry.");
             System.exit(-1);
         }
-       System.out.println("INFO : Send registration request to the registry!");
     }
+
+    @Override
+    public void requestDeRegister(final String hostName, final int portNum) {
+        final DeregisterRequest deregisterRequest = new DeregisterRequest(hostName, portNum);
+        try {
+            sendMessageToRegistry(deregisterRequest.getBytes());
+        } catch (IOException ioe ) {
+            System.out.println("ERROR : Unable to request de-register");
+        }
+    }
+
 
     @Override
     public void registerNode(final RegisterRequest registerRequestEvent, final Socket socket) {
@@ -134,17 +146,24 @@ public class MessagingNode extends AbstractNode {
 
     @Override
     public void registerNodeAcknowledgement(final RegisterAcknowledgement acknowledgement) {
-        //TODO:: Handle deregister.
-        if(requestedToExitOverlay) {
-            System.out.println("System requested to exit the overlay");
+        if (acknowledgement.getCode() == EventConstants.REGISTER_OR_DEREGISTER_FAILURE) {
+            System.out.println("ERROR : Node Failed to Register");
         } else {
-            if (acknowledgement.getCode() == EventConstants.REGISTER_OR_DEREGISTER_FAILURE) {
-                System.out.println("ERROR : Node Failed to Register");
-            } else {
                 System.out.println("INFO : Node Registration Successful");
-            }
         }
         System.out.println("Additional INFO : " + acknowledgement.getAdditionalInfo());
+        if(requestedToExitOverlay) {
+            requestedToExitOverlay = false;
+            System.out.print("INFO : Exiting the overlay");
+            for(String communicationKey : communicationHandlerMap.keySet()) {
+                try {
+                    communicationHandlerMap.get(communicationKey).getSocket().close();
+                } catch (IOException e) {
+                    System.out.println("ERROR : Failed to close socket " + communicationKey) ;
+                }
+            }
+            System.exit(0);
+        }
     }
 
     @Override
@@ -225,6 +244,7 @@ public class MessagingNode extends AbstractNode {
 
     @Override
     public void exitOverlay() {
+        requestedToExitOverlay = true;
         DeregisterRequest deregisterRequest = new DeregisterRequest(myIpAddress, myPortNum);
         try {
             sendMessageToRegistry(deregisterRequest.getBytes());

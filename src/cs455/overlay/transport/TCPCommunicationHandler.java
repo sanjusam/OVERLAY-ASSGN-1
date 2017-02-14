@@ -29,8 +29,7 @@ public class TCPCommunicationHandler {
             return true;
         }catch (IOException ioe) {
             System.out.println("Exiting : Unable to send data");
-            ioe.printStackTrace();
-            return  false;
+            return false;
         }
     }
 

@@ -5,7 +5,7 @@ import java.util.Map;
 
 public enum EventType {
     DEFAULT (0, "default", "default"),
-    REGISTER_REQUEST(1,"register", "reg"),
+    REGISTER_REQUEST(1,"request-register", "reg-reg"),
     REGISTER_RESPONSE (2,"response","res"),
     DEREGISTER_REQUEST(3,"deregister", "dereg"),
     MESSAGING_NODES_LIST(4,"setup-overlay", "setup-overlay"),
@@ -21,7 +21,8 @@ public enum EventType {
     TRAFFIC_SUMMARY(14, "traffic-summary","traffic-sum"),
     TASK_INITIATE(15, "task-initiate","task-init"),
     MESSAGE_TRANSMIT(16, "message-send", "msg-send"),
-    SEND_LISTENING_PORT(17, "listen-port", "listen-port");
+    SEND_LISTENING_PORT(17, "listen-port", "listen-port"),
+    REGISTER_NODE(18, "register", "reg");
 
     private final int value;
     private final String longCommand;

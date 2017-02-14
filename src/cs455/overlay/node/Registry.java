@@ -10,7 +10,6 @@ import cs455.overlay.constants.EventConstants;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 public class Registry extends AbstractNode implements Node {
-    final List<NodeDetails> nodeDetailsList = new ArrayList<>();
+    private final List<NodeDetails> nodeDetailsList = new ArrayList<>();
     private LinkWeights linkWeightsEvent = null;
     private int taskCompleted = 0;
     private int receivedTrafficStatsFromAllNodes = 0;
@@ -48,7 +47,7 @@ public class Registry extends AbstractNode implements Node {
             return;
         }
 
-        if(!validFirstArgument(command, 2, true)) {  //Error check on the argument.
+        if(!validArgument(command, 2, true, 1)) {  //Error check on the argument.
             return;
         }
 
@@ -131,7 +130,7 @@ public class Registry extends AbstractNode implements Node {
             System.out.println("Link Weights  " + ((linkWeightsEvent == null)? "Null": "Not Null"));
             return;
         }
-        if(!validFirstArgument(numRoundsStr, 2, true)) {  //Error check on the argument.
+        if(!validArgument(numRoundsStr, 2, true, 1)) {  //Error check on the argument.
             return;
         }
         final int numRounds = HelperUtils.getInt(numRoundsStr.split(" ")[1]);
@@ -154,7 +153,7 @@ public class Registry extends AbstractNode implements Node {
 
     @Override
     public void exitOverlay() {
-        System.out.println("ERROR : Exit Overlay is not supported on Registry");
+        System.out.println("INFO : Exit Overlay is not supported on Registry");
     }
 
     @Override
@@ -219,9 +218,9 @@ public class Registry extends AbstractNode implements Node {
             Formatter formatter = new Formatter();
             formatter.format("%-32s %-15d %-15d %-25d %-25d  ",
                     "Sum", numAllMessagesSent, numAllMessagesReceived, sumAllMessagesSent, sumAllMessagesReceived);
-            System.out.println(markerMain);
+            System.out.println(MessageConstants.markerMain);
             System.out.println(formatter.toString());
-            System.out.println(markerMain);
+            System.out.println(MessageConstants.markerMain);
             numAllMessagesSent = 0;
             numAllMessagesReceived = 0;
             sumAllMessagesSent = 0;
@@ -239,14 +238,14 @@ public class Registry extends AbstractNode implements Node {
         System.out.println(header1);
         System.out.println(header2);
         System.out.println(header3);
-        System.out.println(markerMain);
-        System.out.println(markerSub);
+        System.out.println(MessageConstants.markerMain);
+        System.out.println(MessageConstants.markerSub);
         System.out.flush();
     }
 
     private void printData(final TrafficSummary trafficSummary) {
         System.out.println(trafficSummary.summaryFormatted());
-        System.out.println(markerSub);
+        System.out.println(MessageConstants.markerSub);
         System.out.flush();
     }
 
@@ -271,14 +270,9 @@ public class Registry extends AbstractNode implements Node {
 
     private Map<NodeDetails, MessagingNodesList> buildOverlayNodes(final int connectionRequirement) {
         final Map<NodeDetails, MessagingNodesList> overlayList = new HashMap<>();
-        System.out.println("DEBUG : Building overlay on all peer nodes");
         buildPeerMessagingNodeOnAllNodes();  /*First builds overlay connection all nodes - to avoid network partitions. */
-        System.out.println("DEBUG : Building overlay RANDOM nodes");
         buildPeerMessagingNodesOnEachNode(connectionRequirement);  /*Build connections on the nodes */
-        System.out.println("DEBUG : DONE Building overlay");
         for(final NodeDetails nodeDetails : nodeDetailsList) {
-            System.out.println("All Connections for node      " + nodeDetails.getFormattedString() + " " + nodeDetails.getAllConnections());
-            System.out.println("Created Connections for node  " + nodeDetails.getFormattedString() + " " + nodeDetails.getConnections().size());
             MessagingNodesList temp = buildMessagingNodeList(nodeDetails);  /* Build the message to be send to each node*/
             overlayList.put(nodeDetails, temp);
         }
@@ -312,28 +306,16 @@ public class Registry extends AbstractNode implements Node {
 
     private void buildPeerMessagingNodesOnEachNode(final int connectionRequirement) {
         /*Check capacity of each nodes and creates links for each node.*/
-        final List<NodeDetails> tmpNodeDetailsList  = nodeDetailsList;
-        final List <NodeDetails> shuffledNodeDetails = nodeDetailsList;
-//        Collections.shuffle(shuffledNodeDetails);
-        ListIterator<NodeDetails> nodeListIterator = tmpNodeDetailsList.listIterator();
-        System.out.println("1");
+        final List <NodeDetails> shuffledNodeDetails = new ArrayList<>(nodeDetailsList);
+        ListIterator<NodeDetails> nodeListIterator = nodeDetailsList.listIterator();
 
         while (nodeListIterator.hasNext()) {
-            System.out.println("2");
             NodeDetails currentNode = nodeListIterator.next();
-            System.out.println("3");
+            int idx = 0;
             while (currentNode.moreConnectionsAllowed(connectionRequirement)) {
-                System.out.println("Size of node list ::   " + nodeDetailsList.size() );
-                int idx = 0;
-                System.out.println("4");
-//                int randomNum = HelperUtils.generateRandomNumber(0, tmpNodeDetailsList.size()-1);
-                System.out.println("5  - Random number "  + idx);
                 NodeDetails connectingNode = shuffledNodeDetails.get(idx);
-                System.out.println("6");
                 if(isNodeContactable(currentNode, connectingNode, connectionRequirement)) {
-                    System.out.println("7");
                     currentNode.addConnections(connectingNode);
-                    System.out.println("8");
                 }
                 idx++;
                 if(idx >= shuffledNodeDetails.size()) {
@@ -345,11 +327,9 @@ public class Registry extends AbstractNode implements Node {
 
     private boolean isNodeContactable(final NodeDetails source, final NodeDetails destination, final int connectionRequirement) {
         if (!destination.moreConnectionsAllowed(connectionRequirement)) {  /*Check Maximum connections reached.*/
-            System.out.println("DEBUG : max connection exceeded");
             return false;
         }
         if(source.getFormattedString().equals(destination.getFormattedString())) {  /*Connection to itself is not supported.*/
-            System.out.println("DEBUG : Node connection to itself");
             return false;
         }
         return !source.nodeAlreadyConnected(destination);  /*Connect if not already connected.*/
@@ -366,16 +346,16 @@ public class Registry extends AbstractNode implements Node {
         final boolean ipAddressSame = matchIpForMessageAndSocket(socket, deregisterRequest.getNodeIpAddress());
 
         if(!alreadyRegistered || !ipAddressSame) {
-            if(!alreadyRegistered) { /*Branch for the Failure types*/
-                registerAck = new RegisterAcknowledgement(EventConstants.REGISTER_OR_DEREGISTER_FAILURE, MessageConstants.NODE_NOT_REGISTERED);
-            } else {
+            if(!ipAddressSame) { /*Branch for the Failure types*/
                 registerAck = new RegisterAcknowledgement(EventConstants.REGISTER_OR_DEREGISTER_FAILURE, MessageConstants.IP_MISMATCH_DEREGISTRATION
                         + socket.getRemoteSocketAddress().toString() + " " + deregisterRequest.getNodeIpAddress());
+            } else {
+                registerAck = new RegisterAcknowledgement(EventConstants.REGISTER_OR_DEREGISTER_FAILURE, MessageConstants.NODE_NOT_REGISTERED);
             }
         } else {
+            removeNodeFromList(deregisterRequest.getNodeIpAddress(), deregisterRequest.getPortNum());
             registerAck = new RegisterAcknowledgement(EventConstants.REGISTER_OR_DEREGISTER_SUCCESS,
                     MessageConstants.SUCCESSFUL_DEREGISTRATION.replaceAll("(%d)", Integer.toString(nodeDetailsList.size())));
-            removeNodeFromList(deregisterRequest.getNodeIpAddress(), deregisterRequest.getPortNum());
         }
         sendEvent(registerAck, socket);
     }
@@ -410,6 +390,16 @@ public class Registry extends AbstractNode implements Node {
         }
     }
 
+    @Override
+    public void initiateNodeRegistration(final String myHostName, final int myPortNum) {
+        System.out.println("INFO : Initiate node registration is not supported on registry.");
+    }
+
+    @Override
+    public void requestDeRegister(final String myHostName, final int myPortNum) {
+        System.out.println("INFO : Request de-registration is not supported on registry.");
+    }
+
     private void removeNodeFromList(final String nodeIpAddres, final int portNum) {
         int indexForRemoval = -1;
         for (final NodeDetails nodeDetails : nodeDetailsList)
@@ -431,7 +421,7 @@ public class Registry extends AbstractNode implements Node {
             ioe.printStackTrace();
             return false;
         }
-        System.out.println("INFO : Send registration acknowledgement " + socket.getInetAddress() + "     " + socket.getLocalPort() + "  " + socket.getPort()  );
+        System.out.println("INFO : Send registration acknowledgement " + socket.getInetAddress() + ":" + socket.getPort() );
         return true;
     }
 
@@ -448,7 +438,6 @@ public class Registry extends AbstractNode implements Node {
         for(final NodeDetails nodeDetails : nodeDetailsList) {
             TCPCommunicationHandler communicationHandler = getConnectionFromPool(nodeDetails.getFormattedString());  /*Check if a connection is already created to the node, if not create on.*/
             if(communicationHandler == null) {
-                System.out.println("INFO : Create a connection for node " + nodeDetails.getFormattedString());
                 Socket socket= new Socket(nodeDetails.getNodeName(), nodeDetails.getPortNum());
                 communicationHandler = update(socket);
             }
@@ -474,7 +463,4 @@ public class Registry extends AbstractNode implements Node {
         System.out.println("Remote IP Address  : " + ipAddressInSocket + " Ipaddress in message " + nodeIpAddress);
         return ipAddressInSocket.equals(nodeIpAddress);
     }
-
-    private final String markerMain =  "\t\t\t=======================================================================================================";
-    private final String markerSub =   "\t\t\t-------------------------------------------------------------------------------------------------------";
 }

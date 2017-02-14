@@ -25,7 +25,7 @@ public class RoutingCache {
             return;
         }
         if(path.isEmpty()) {
-            this.path += path;
+            this.path += nextNode;
         } else {
             this.path =  path + MessageConstants.NODE_PATH_SEPARATOR + nextNode;
         }

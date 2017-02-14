@@ -105,41 +105,68 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
         } else if (eventType == EventType.TASK_INITIATE) {
             startMessaging(command);
         } else if (eventType == EventType.DEREGISTER_REQUEST) {
-            requestDeRegisterNode();
+            checkCommandOptionsAndSendToProcesses(command, false);
         } else if (eventType == EventType.EXIT_OVERLAY) {
-            requestDeRegisterNode(); //TODO :: WHAT??
+            exitOverlay(); //TODO :: WHAT??
         } else if (eventType == EventType.PRINT_SHORT_PATH) {
             printShortestPath();
+        } else if(eventType == EventType.REGISTER_NODE) {
+            checkCommandOptionsAndSendToProcesses(command, true);
         }
     }
 
-
-    private void requestDeRegisterNode() {
-        final DeregisterRequest deregisterRequest = new DeregisterRequest(myIpAddress, myPortNum);
-        try {
-            sendMessageToRegistry(deregisterRequest.getBytes());
-        } catch (IOException ioe ) {
-            System.out.println("Unable to send the traffic stats to the registry");
-        }
-    }
 
     private void requestExitOverlay() {
         requestedToExitOverlay = true;
-        requestDeRegisterNode();
+        requestDeRegister(myIpAddress, myPortNum);
     }
 
-    /*package */ boolean validFirstArgument(final String commandToValidate, final int expectedParts, final boolean isNumeric) {
+    void checkCommandOptionsAndSendToProcesses(final String command, final boolean register) {
+        String parts[] = command.split(" ");
+        String address ;
+        int portNum;
+
+        if(parts.length == 3) {
+            if (parts[1] != null && parts[2] != null) {
+                if (isNumeric(parts[2])) {
+                    portNum = HelperUtils.getInt(parts[2]);
+                    address = parts[1];
+                    if (register) {
+                        initiateNodeRegistration(address, portNum);  // Deal with the details passed
+                    } else {
+                        requestDeRegister(address, portNum);
+                    }
+                }
+            }
+        } else {
+            if (register) {
+                initiateNodeRegistration(myIpAddress, myPortNum);  // deal with my own host/port
+            } else {
+                requestDeRegister(myIpAddress, myPortNum);
+            }
+        }
+    }
+
+    /*package */ boolean validArgument(final String commandToValidate, final int expectedParts, final boolean isNumeric, final int whichIsNumeric) {
         if(commandToValidate.split(" ").length < expectedParts) {
             System.out.println("The command " + commandToValidate.split(" ")[0] +" is expected to have argument[s]");
             return false;
         }
         if(isNumeric) {  /*If its supposed to be numeric, then convert and check if its numeric*/
-            String cmdArg = commandToValidate.split(" ")[1];
+            String cmdArg = commandToValidate.split(" ")[whichIsNumeric];
             int firstArgNum = HelperUtils.getInt(cmdArg);
             if (firstArgNum == -1) {
                 System.out.println("The command " + commandToValidate.split(" ")[0] + " is expected to have a numeric argument " + cmdArg);
                 return false;
             }
+        }
+        return true;
+    }
+
+    private boolean isNumeric(final String checkString) {
+        int numArg = HelperUtils.getInt(checkString);
+        if (numArg== -1) {
+            return false;
         }
         return true;
     }
