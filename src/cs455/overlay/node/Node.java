@@ -29,4 +29,8 @@ public interface Node {
     void printShortestPath();
     void exitOverlay();
     void forceExit();
+
+    /*An interface where all the node capabilities are defined.  All the capabilities are defined here, but some is not used in one type for node.
+	For example printShortestPath() is a capability for the Messaging node, but doesnt work on Registry.  So Registry's implementation of printShortestPath()
+	is just a print message that its not supported.  Where as Messaging node implementation is printing the actual shortest path to all nodes.*/
 }

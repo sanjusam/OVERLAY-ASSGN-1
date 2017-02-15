@@ -107,16 +107,6 @@ public class Registry extends AbstractNode implements Node {
     }
 
     @Override
-    public void processLinkWeights(final SendLinkWeightsEvent sendLinkWeightsEvent) {
-        System.out.println(("INFO : Processing received link weights is not supported on Registry"));
-    }
-
-    @Override
-    public void makeConnectionsOnOverLayNodes(final SendMessagingNodesListEvent sendMessagingNodesListEvent) {
-        System.out.println(("INFO : Make Overlay connections is not supported on Registry"));
-    }
-
-    @Override
     public void listMessagingNodes() {
         if(nodeDetailsList.size() == 0) {
             System.out.println("Messaging Nodes are not configured yet");
@@ -157,20 +147,6 @@ public class Registry extends AbstractNode implements Node {
         }
     }
 
-   @Override
-    public void startMessaging(final String numRoundsStr) {
-        System.out.println("INFO : Start Messaging is not supported on Registry");
-    }
-    @Override
-    public void printShortestPath() {
-        System.out.println("INFO : Print shortest path is not supported on Registry");
-    }
-
-    @Override
-    public void exitOverlay() {
-        System.out.println("INFO : Exit Overlay is not supported on Registry");
-    }
-
     @Override
     public void acknowledgeTaskComplete(final String node, final int port) {
         synchronized (LOCK_REGISTRY) {
@@ -199,22 +175,6 @@ public class Registry extends AbstractNode implements Node {
         } catch (IOException ioe) {
             System.out.println("ERROR : Unable to send pull-traffic summary to all nodes");
         }
-    }
-
-    @Override
-    public void registerNodeAcknowledgement(final RegisterAcknowledgementEvent acknowledgement) {
-        System.out.println("INFO : Register node acknowledgement is not supported on Registry");
-    }
-
-
-    @Override
-    public void processReceivedMessage(final TransmitMessageEvent transmitMessageEvent) {
-        System.out.println("INFO : Received Random message is not supported on Registry");
-    }
-
-    @Override
-    public void updateConnectionInfo(final SendListeningPortEvent sendListeningPortEvent, final Socket socket) {
-        System.out.println("INFO : Update connection info is not supported on registry");
     }
 
     @Override
@@ -296,7 +256,7 @@ public class Registry extends AbstractNode implements Node {
         return overlayList;
     }
 
-    private SendMessagingNodesListEvent buildMessagingNodeList(final NodeDetails nodeDetails) {
+    private SendMessagingNodesListEvent buildMessagingNodeList(final NodeDetails nodeDetails) {  /* Build the messaing node list for ach node.*/
         final SendMessagingNodesListEvent overlayList = new SendMessagingNodesListEvent(0);
         if ((nodeDetails.getConnections().isEmpty()) || (nodeDetails.getConnections().size() <= 0)) {
             return overlayList;
@@ -407,16 +367,6 @@ public class Registry extends AbstractNode implements Node {
         }
     }
 
-    @Override
-    public void initiateNodeRegistration(final String myHostName, final int myPortNum) {
-        System.out.println("INFO : Initiate node registration is not supported on registry.");
-    }
-
-    @Override
-    public void requestDeRegister(final String myHostName, final int myPortNum) {
-        System.out.println("INFO : Request de-registration is not supported on registry.");
-    }
-
     private void removeNodeFromList(final String nodeIpAddres, final int portNum) {
         int indexForRemoval = -1;
         for (final NodeDetails nodeDetails : nodeDetailsList) {
@@ -481,5 +431,56 @@ public class Registry extends AbstractNode implements Node {
         }
         System.out.println("Remote IP Address  : " + ipAddressInSocket + " Ipaddress in message " + nodeIpAddress);
         return ipAddressInSocket.equals(nodeIpAddress);
+    }
+
+    @Override
+    public void registerNodeAcknowledgement(final RegisterAcknowledgementEvent acknowledgement) {
+        System.out.println("INFO : Register node acknowledgement is not supported on Registry");
+    }
+
+
+    @Override
+    public void processReceivedMessage(final TransmitMessageEvent transmitMessageEvent) {
+        System.out.println("INFO : Received Random message is not supported on Registry");
+    }
+
+    @Override
+    public void updateConnectionInfo(final SendListeningPortEvent sendListeningPortEvent, final Socket socket) {
+        System.out.println("INFO : Update connection info is not supported on registry");
+    }
+
+    @Override
+    public void initiateNodeRegistration(final String myHostName, final int myPortNum) {
+        System.out.println("INFO : Initiate node registration is not supported on registry.");
+    }
+
+    @Override
+    public void requestDeRegister(final String myHostName, final int myPortNum) {
+        System.out.println("INFO : Request de-registration is not supported on registry.");
+    }
+
+    @Override
+    public void startMessaging(final String numRoundsStr) {
+        System.out.println("INFO : Start Messaging is not supported on Registry");
+    }
+
+    @Override
+    public void printShortestPath() {
+        System.out.println("INFO : Print shortest path is not supported on Registry");
+    }
+
+    @Override
+    public void exitOverlay() {
+        System.out.println("INFO : Exit Overlay is not supported on Registry");
+    }
+
+    @Override
+    public void processLinkWeights(final SendLinkWeightsEvent sendLinkWeightsEvent) {
+        System.out.println(("INFO : Processing received link weights is not supported on Registry"));
+    }
+
+    @Override
+    public void makeConnectionsOnOverLayNodes(final SendMessagingNodesListEvent sendMessagingNodesListEvent) {
+        System.out.println(("INFO : Make Overlay connections is not supported on Registry"));
     }
 }

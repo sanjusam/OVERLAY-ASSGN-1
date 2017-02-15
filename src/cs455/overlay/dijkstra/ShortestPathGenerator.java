@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-class ShortestPathGenerator {
+class ShortestPathGenerator { /*The actual Dijkstra implementation*/
     private int MAX_NODES;
     private int SOURCE;
 
@@ -88,7 +88,7 @@ class ShortestPathGenerator {
         }
     }
 
-    private void relax(ConceptualNode u, ConceptualNode v, int weight) {
+    private void relax(ConceptualNode u, ConceptualNode v, int weight) { //relaxing each node on weights
         if (v.getDistance() > u.getDistance()+ weight) {
             v.setDistance(u.getDistance()+ weight);
             v.setParent(u.getId());
