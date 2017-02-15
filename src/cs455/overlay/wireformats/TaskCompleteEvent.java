@@ -10,10 +10,14 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class StartMessagingSignal extends AbstractEvent {
+public class TaskCompleteEvent extends AbstractEvent {
+    private final String nodeIpAddress;
+    private final int portNum;
 
-    public StartMessagingSignal() {
-        super(EventType.SIGNAL_TO_START_MSG.getValue());
+    public TaskCompleteEvent(final String nodeIpAddress, final int portNum) {
+        super(EventType.TASK_COMPLETE.getValue());
+        this.nodeIpAddress = nodeIpAddress;
+        this.portNum = portNum;
     }
 
     @Override
@@ -21,6 +25,8 @@ public class StartMessagingSignal extends AbstractEvent {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
         dout.writeInt(type);
+        writeStringAsByte(dout, nodeIpAddress);
+        dout.writeInt(portNum);
         dout.flush();
         byte[] marshalledBytes = byteArrayOutputStream.toByteArray();
         byteArrayOutputStream.close();
@@ -28,11 +34,23 @@ public class StartMessagingSignal extends AbstractEvent {
         return marshalledBytes;
     }
 
-    public StartMessagingSignal(byte[] marshalledBytes) throws IOException {
+    public TaskCompleteEvent(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
         type = dataInputStream.readInt();
+        nodeIpAddress = readStringFromBytes(dataInputStream);
+        portNum = dataInputStream.readInt();
         byteArrayInputStream.close();
         dataInputStream.close();
     }
+
+    public String getNodeIpAddress() {
+        return nodeIpAddress;
+    }
+
+    public int getPortNum() {
+        return portNum;
+    }
+
+
 }

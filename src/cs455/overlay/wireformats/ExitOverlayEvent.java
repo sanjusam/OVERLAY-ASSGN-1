@@ -10,14 +10,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class TaskComplete extends AbstractEvent {
-    private final String nodeIpAddress;
-    private final int portNum;
+public class ExitOverlayEvent extends AbstractEvent {
 
-    public TaskComplete(final String nodeIpAddress, final int portNum) {
-        super(EventType.TASK_COMPLETE.getValue());
-        this.nodeIpAddress = nodeIpAddress;
-        this.portNum = portNum;
+    public ExitOverlayEvent() {
+        super(EventType.EXIT_OVERLAY.getValue());
     }
 
     @Override
@@ -25,8 +21,6 @@ public class TaskComplete extends AbstractEvent {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
         dout.writeInt(type);
-        writeStringAsByte(dout, nodeIpAddress);
-        dout.writeInt(portNum);
         dout.flush();
         byte[] marshalledBytes = byteArrayOutputStream.toByteArray();
         byteArrayOutputStream.close();
@@ -34,23 +28,11 @@ public class TaskComplete extends AbstractEvent {
         return marshalledBytes;
     }
 
-    public TaskComplete(byte[] marshalledBytes) throws IOException {
+    public ExitOverlayEvent(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
         type = dataInputStream.readInt();
-        nodeIpAddress = readStringFromBytes(dataInputStream);
-        portNum = dataInputStream.readInt();
         byteArrayInputStream.close();
         dataInputStream.close();
     }
-
-    public String getNodeIpAddress() {
-        return nodeIpAddress;
-    }
-
-    public int getPortNum() {
-        return portNum;
-    }
-
-
 }

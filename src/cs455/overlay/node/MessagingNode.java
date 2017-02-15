@@ -46,7 +46,7 @@ public class MessagingNode extends AbstractNode {
             System.out.println("INFO : Send registration request to the registry!");
             Socket connectionToRegistry = new Socket(registryHost, registryPort);
             registerCommHandler = update(connectionToRegistry);
-            final Event registerEvent = new RegisterRequest(myHostName, myPortNum);
+            final Event registerEvent = new RegisterRequestEvent(myHostName, myPortNum);
             registerCommHandler.sendData(registerEvent.getBytes());
         } catch (IOException ioe) {
             System.out.println("ERROR : Exiting Unable to initiate connection to registry.");
@@ -56,9 +56,9 @@ public class MessagingNode extends AbstractNode {
 
     @Override
     public void requestDeRegister(final String hostName, final int portNum) {
-        final DeregisterRequest deregisterRequest = new DeregisterRequest(hostName, portNum);
+        final DeregisterRequestEvent deregisterRequestEvent = new DeregisterRequestEvent(hostName, portNum);
         try {
-            sendMessageToRegistry(deregisterRequest.getBytes());
+            sendMessageToRegistry(deregisterRequestEvent.getBytes());
         } catch (IOException ioe ) {
             System.out.println("ERROR : Unable to request de-register");
         }
@@ -66,7 +66,7 @@ public class MessagingNode extends AbstractNode {
 
 
     @Override
-    public void makeConnectionsOnOverLayNodes(final MessagingNodesList nodesList) {
+    public void makeConnectionsOnOverLayNodes(final SendMessagingNodesListEvent nodesList) {
         /*Walk through the all the messaging node, create connection and listen to the incoming connections.*/
         if(nodesList.getNumNodes()== 0) {
             System.out.println("INFO : The node is NOT instructed to create any Messaging Node Connection");
@@ -89,7 +89,7 @@ public class MessagingNode extends AbstractNode {
                 final Socket nodeConnection = new Socket(nodeName, portNum);
                 TCPCommunicationHandler tcpCommunicationHandler = update(nodeConnection);
                 ++connectionsMade;
-                final SendListeningPort listeningPortMsg = new SendListeningPort(myPortNum);
+                final SendListeningPortEvent listeningPortMsg = new SendListeningPortEvent(myPortNum);
                 tcpCommunicationHandler.sendData(listeningPortMsg.getBytes());
             } catch (final IOException ioe) {
                 System.out.println("ERROR : IO Exception thrown while trying to establish connection to " + nodeSpec);
@@ -100,22 +100,22 @@ public class MessagingNode extends AbstractNode {
     }
 
     @Override
-    public void updateConnectionInfo(final SendListeningPort sendListeningPort, final Socket socket) {
-        updateConnectionInformation(socket, sendListeningPort.getListeningPort());
+    public void updateConnectionInfo(final SendListeningPortEvent sendListeningPortEvent, final Socket socket) {
+        updateConnectionInformation(socket, sendListeningPortEvent.getListeningPort());
     }
 
 
     @Override
-    public void processLinkWeights(final LinkWeights linkWeights) {
+    public void processLinkWeights(final SendLinkWeightsEvent sendLinkWeightsEvent) {
         final String me = myIpAddress + MessageConstants.NODE_PORT_SEPARATOR + myPortNum;
-        extractLinkWeights = new ExtractLinkWeights(linkWeights.getLinkWeightList(), me);
+        extractLinkWeights = new ExtractLinkWeights(sendLinkWeightsEvent.getLinkWeightList(), me);
         routingCacheList = extractLinkWeights.getRoutingForAllNodes();
         System.out.println("INFO : Link weights are received and processed. Ready to send messages.");
         linkWeightsProcessed = true;
     }
 
     @Override
-    public void registerNodeAcknowledgement(final RegisterAcknowledgement acknowledgement) {
+    public void registerNodeAcknowledgement(final RegisterAcknowledgementEvent acknowledgement) {
         if (acknowledgement.getCode() == EventConstants.REGISTER_OR_DEREGISTER_FAILURE) {
             System.out.println("ERROR : Node Failed to Register");
         } else {
@@ -161,7 +161,7 @@ public class MessagingNode extends AbstractNode {
                 if(nodeToSend != null) {
                     final TCPCommunicationHandler nextHopNodeConnection  = getConnectionHandlerForNextHop(nodeToSend);
                     if(nextHopNodeConnection != null) {
-                        final TransmitMessage message = new TransmitMessage(rndMessage, nodeToSend);
+                        final TransmitMessageEvent message = new TransmitMessageEvent(rndMessage, nodeToSend);
                         try {
                             nextHopNodeConnection.sendData(message.getBytes());
                         } catch (IOException ioe) {
@@ -180,17 +180,17 @@ public class MessagingNode extends AbstractNode {
     }
 
     @Override
-    public synchronized void processReceivedMessage(final TransmitMessage transmitMessage) {
+    public synchronized void processReceivedMessage(final TransmitMessageEvent transmitMessageEvent) {
         final String me = myIpAddress + MessageConstants.NODE_PORT_SEPARATOR + myPortNum;
-        if(transmitMessage.getDestination().equals(me)) {  //This is the destination, update counters and drop the packet
+        if(transmitMessageEvent.getDestination().equals(me)) {  //This is the destination, update counters and drop the packet
             ++numOfMessagesReceived;
-            sumOfReceivedMessages += transmitMessage.getMessageContent();
+            sumOfReceivedMessages += transmitMessageEvent.getMessageContent();
         } else { //Retransmit the package!
             ++numOfMessagesRelayed;
-            final String nodeToSend = transmitMessage.getDestination();
+            final String nodeToSend = transmitMessageEvent.getDestination();
             final TCPCommunicationHandler connectionHandlerForNextHop = getConnectionHandlerForNextHop(nodeToSend);
             try {
-                connectionHandlerForNextHop.sendData(transmitMessage.getBytes());
+                connectionHandlerForNextHop.sendData(transmitMessageEvent.getBytes());
             } catch (IOException ioe) {
                 System.out.println("INFO : Failed to send message");
             }
@@ -202,9 +202,9 @@ public class MessagingNode extends AbstractNode {
 
     @Override
     public void forceExit() {
-        final ForceExit forceExit = new ForceExit();
+        final ForceExitEvent forceExitEvent = new ForceExitEvent();
         try {
-            sendMessageToRegistry(forceExit.getBytes());
+            sendMessageToRegistry(forceExitEvent.getBytes());
         } catch (IOException ioe) {
             System.out.println("ERROR : Unable to send force exit message to registry");
         }
@@ -227,9 +227,9 @@ public class MessagingNode extends AbstractNode {
     @Override
     public void exitOverlay() {
         requestedToExitOverlay = true;
-        DeregisterRequest deregisterRequest = new DeregisterRequest(myIpAddress, myPortNum);
+        DeregisterRequestEvent deregisterRequestEvent = new DeregisterRequestEvent(myIpAddress, myPortNum);
         try {
-            sendMessageToRegistry(deregisterRequest.getBytes());
+            sendMessageToRegistry(deregisterRequestEvent.getBytes());
         } catch (IOException ioe ) {
             System.out.println("Unable to send the traffic stats to the registry");
         }
@@ -238,17 +238,17 @@ public class MessagingNode extends AbstractNode {
     @Override
     public void pullTrafficSummary() {
         pullSummaryRequestReceived = true;
-        final TrafficSummary trafficSummary = new TrafficSummary();
-        trafficSummary.setIpAddress(myIpAddress);
-        trafficSummary.setPortNum(myPortNum);
-        trafficSummary.setNumOfMessagesSend(numOfMessagesSend);
-        trafficSummary.setNumOfMessagesReceived(numOfMessagesReceived);
-        trafficSummary.setSumOfReceivedMessages(sumOfReceivedMessages);
-        trafficSummary.setSumOfSendMessage(sumOfSendMessage);
-        trafficSummary.setNumOfMessagesRelayed(numOfMessagesRelayed);
+        final TrafficSummaryEvent trafficSummaryEvent = new TrafficSummaryEvent();
+        trafficSummaryEvent.setIpAddress(myIpAddress);
+        trafficSummaryEvent.setPortNum(myPortNum);
+        trafficSummaryEvent.setNumOfMessagesSend(numOfMessagesSend);
+        trafficSummaryEvent.setNumOfMessagesReceived(numOfMessagesReceived);
+        trafficSummaryEvent.setSumOfReceivedMessages(sumOfReceivedMessages);
+        trafficSummaryEvent.setSumOfSendMessage(sumOfSendMessage);
+        trafficSummaryEvent.setNumOfMessagesRelayed(numOfMessagesRelayed);
 
         try {
-            if(sendMessageToRegistry(trafficSummary.getBytes())) {
+            if(sendMessageToRegistry(trafficSummaryEvent.getBytes())) {
                 clearMessageCounters();
             }
         } catch (IOException ioe ) {
@@ -258,9 +258,9 @@ public class MessagingNode extends AbstractNode {
 
     private void updateRegistryOnTaskCompletion() {
         System.out.println("INFO : Sending Task Completed message to registry ");
-        final TaskComplete taskComplete = new TaskComplete(myIpAddress, myPortNum);
+        final TaskCompleteEvent taskCompleteEvent = new TaskCompleteEvent(myIpAddress, myPortNum);
         try {
-            registerCommHandler.sendData(taskComplete.getBytes());
+            registerCommHandler.sendData(taskCompleteEvent.getBytes());
         } catch (IOException ioe) {
             System.out.println("ERROR : Unable to send TASK COMPLETION event to the registry.");
         }
@@ -292,7 +292,7 @@ public class MessagingNode extends AbstractNode {
     }
 
     @Override
-    public void printTrafficSummary(final TrafficSummary trafficSummary) {
+    public void printTrafficSummary(final TrafficSummaryEvent trafficSummaryEvent) {
         System.out.println(("INFO : Print Traffic summary is not supported on messaging node"));
     }
 
@@ -312,12 +312,12 @@ public class MessagingNode extends AbstractNode {
     }
 
     @Override
-    public void registerNode(final RegisterRequest registerRequestEvent, final Socket socket) {
+    public void registerNode(final RegisterRequestEvent registerRequestEventEvent, final Socket socket) {
         System.out.println("INFO : Register node is not supported on a messaging node.");
     }
 
     @Override
-    public void deRegisterNode(final DeregisterRequest deregisterRequest, final Socket socket) {
+    public void deRegisterNode(final DeregisterRequestEvent deregisterRequestEvent, final Socket socket) {
         System.out.println("INFO : Register node is not supported on a messaging node.");
     }
 

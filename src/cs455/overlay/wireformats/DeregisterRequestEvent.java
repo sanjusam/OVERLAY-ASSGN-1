@@ -1,6 +1,5 @@
 package cs455.overlay.wireformats;
 
-
 import cs455.overlay.constants.EventType;
 
 import java.io.BufferedInputStream;
@@ -11,15 +10,15 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+public class DeregisterRequestEvent extends AbstractEvent {
 
-public class TransmitMessage extends AbstractEvent {
-    private final int messageContent;
-    private final String destination;
+    private final String nodeIpAddress;
+    private final int portNum;
 
-    public TransmitMessage(final int messageContent, final String destination) {
-        super(EventType.MESSAGE_TRANSMIT.getValue());
-        this.messageContent =  messageContent;
-        this.destination = destination;
+    public DeregisterRequestEvent(final String nodeIpAddress, final int portNum) {
+        super(EventType.DEREGISTER_REQUEST.getValue());
+        this.nodeIpAddress = nodeIpAddress;
+        this.portNum = portNum;
     }
 
     @Override
@@ -27,8 +26,8 @@ public class TransmitMessage extends AbstractEvent {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
         dout.writeInt(type);
-        dout.writeInt(messageContent);
-        writeStringAsByte(dout, destination);
+        writeStringAsByte(dout, nodeIpAddress);
+        dout.writeInt(portNum);
         dout.flush();
         byte[] marshalledBytes = byteArrayOutputStream.toByteArray();
         byteArrayOutputStream.close();
@@ -36,23 +35,20 @@ public class TransmitMessage extends AbstractEvent {
         return marshalledBytes;
     }
 
-    public TransmitMessage(byte[] marshalledBytes) throws IOException {
+    public DeregisterRequestEvent(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
         type = dataInputStream.readInt();
-        messageContent = dataInputStream.readInt();
-        destination = readStringFromBytes(dataInputStream);
+        nodeIpAddress = readStringFromBytes(dataInputStream);
+        portNum = dataInputStream.readInt();
         byteArrayInputStream.close();
         dataInputStream.close();
     }
 
-    public String getDestination () {
-        return destination;
+    public String getNodeIpAddress() {
+        return nodeIpAddress;
     }
 
-    public int getMessageContent() {
-        return messageContent;
-    }
-
-
-}
+    public int getPortNum() {
+        return portNum;
+    }}

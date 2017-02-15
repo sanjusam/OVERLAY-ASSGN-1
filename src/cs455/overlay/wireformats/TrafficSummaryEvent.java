@@ -1,7 +1,7 @@
 package cs455.overlay.wireformats;
 
 import cs455.overlay.constants.EventType;
-import cs455.overlay.constants.MessageConstants;
+
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -12,7 +12,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Formatter;
 
-public class TrafficSummary extends AbstractEvent {
+public class TrafficSummaryEvent extends AbstractEvent {
     private String ipAddress;
     private int portNum;
     private int numOfMessagesSend;
@@ -23,7 +23,7 @@ public class TrafficSummary extends AbstractEvent {
 
     private int numOfMessagesRelayed;
 
-    public TrafficSummary() {
+    public TrafficSummaryEvent() {
         super(EventType.TRAFFIC_SUMMARY.getValue());
     }
 
@@ -48,7 +48,7 @@ public class TrafficSummary extends AbstractEvent {
     }
 
 
-    public TrafficSummary(byte[] marshalledBytes) throws IOException {
+    public TrafficSummaryEvent(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
         type = dataInputStream.readInt();

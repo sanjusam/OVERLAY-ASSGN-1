@@ -1,6 +1,5 @@
 package cs455.overlay.wireformats;
 
-
 import cs455.overlay.constants.EventType;
 
 import java.io.BufferedInputStream;
@@ -11,11 +10,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class SendListeningPort extends AbstractEvent {
-    private final int listeningPort;
-    public SendListeningPort(final int listeningPort) {
-        super(EventType.SEND_LISTENING_PORT.getValue());
-        this.listeningPort = listeningPort;
+public class TaskInitiateEvent extends AbstractEvent {
+
+    private final int numRounds;
+
+    public TaskInitiateEvent(final int numRounds) {
+        super(EventType.TASK_INITIATE.getValue());
+        this.numRounds = numRounds;
     }
 
     @Override
@@ -23,7 +24,7 @@ public class SendListeningPort extends AbstractEvent {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
         dout.writeInt(type);
-        dout.writeInt(listeningPort);
+        dout.writeInt(numRounds);
         dout.flush();
         byte[] marshalledBytes = byteArrayOutputStream.toByteArray();
         byteArrayOutputStream.close();
@@ -31,17 +32,17 @@ public class SendListeningPort extends AbstractEvent {
         return marshalledBytes;
     }
 
-
-    public SendListeningPort (byte[] marshalledBytes) throws IOException {
+    public TaskInitiateEvent(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
         type = dataInputStream.readInt();
-        listeningPort= dataInputStream.readInt();
+        numRounds = dataInputStream.readInt();
         byteArrayInputStream.close();
         dataInputStream.close();
     }
 
-    public int getListeningPort() {
-        return listeningPort;
+    public String getNumRoundsAsString() {
+        return Integer.toString(numRounds);
     }
+
 }

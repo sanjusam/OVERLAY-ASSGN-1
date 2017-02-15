@@ -5,22 +5,22 @@ clean:
 	@echo -e '[INFO] Cleanup class files'
 	@rm  -rf ./cs455/overlay/utils/HelperUtils.class
 	@rm  -rf ./cs455/overlay/wireformats/AbstractEvent.class
-	@rm  -rf ./cs455/overlay/wireformats/Default.class
-	@rm  -rf ./cs455/overlay/wireformats/RegisterRequest.class
-	@rm  -rf ./cs455/overlay/wireformats/LinkWeights.class
+	@rm  -rf ./cs455/overlay/wireformats/DefaultEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/RegisterRequestEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/SendLinkWeightsEvent.class
 	@rm  -rf ./cs455/overlay/wireformats/EventFactory.class
-	@rm  -rf ./cs455/overlay/wireformats/MessagingNodesList.class
-	@rm  -rf ./cs455/overlay/wireformats/DeregisterRequest.class
+	@rm  -rf ./cs455/overlay/wireformats/SendMessagingNodesListEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/DeregisterRequestEvent.class
 	@rm  -rf ./cs455/overlay/wireformats/Event.class
-	@rm  -rf ./cs455/overlay/wireformats/RegisterAcknowledgement.class
-	@rm  -rf ./cs455/overlay/wireformats/TaskInitiate.class
-	@rm  -rf ./cs455/overlay/wireformats/TaskComplete.class
-	@rm  -rf ./cs455/overlay/wireformats/PullTrafficSummary.class
-	@rm  -rf ./cs455/overlay/wireformats/TrafficSummary.class
-	@rm  -rf ./cs455/overlay/wireformats/StartMessagingSignal.class
-	@rm  -rf ./cs455/overlay/wireformats/TransmitMessage.class
-	@rm  -rf ./cs455/overlay/wireformats/SendListeningPort.class
-	@rm  -rf ./cs455/overlay/wireformats/ForceExit.class
+	@rm  -rf ./cs455/overlay/wireformats/RegisterAcknowledgementEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/TaskInitiateEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/TaskCompleteEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/PullTrafficSummaryEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/TrafficSummaryEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/StartMessagingEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/TransmitMessageEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/SendListeningPortEvent.class
+	@rm  -rf ./cs455/overlay/wireformats/ForceExitEvent.class
 	@rm  -rf ./cs455/overlay/node/AbstractNode.class
 	@rm  -rf ./cs455/overlay/node/MessagingNode.class
 	@rm  -rf ./cs455/overlay/node/CommandListener.class
@@ -52,20 +52,20 @@ compile:
 	@javac -d . ./src/cs455/overlay/constants/MessageConstants.java
 	@javac -d . ./src/cs455/overlay/wireformats/Event.java
 	@javac -d . ./src/cs455/overlay/wireformats/AbstractEvent.java
-	@javac -d . ./src/cs455/overlay/wireformats/MessagingNodesList.java
-	@javac -d . ./src/cs455/overlay/wireformats/Default.java
-	@javac -d . ./src/cs455/overlay/wireformats/RegisterRequest.java
-	@javac -d . ./src/cs455/overlay/wireformats/DeregisterRequest.java
-	@javac -d . ./src/cs455/overlay/wireformats/LinkWeights.java
-	@javac -d . ./src/cs455/overlay/wireformats/TaskInitiate.java
-	@javac -d . ./src/cs455/overlay/wireformats/TaskComplete.java
-	@javac -d . ./src/cs455/overlay/wireformats/PullTrafficSummary.java
-	@javac -d . ./src/cs455/overlay/wireformats/TrafficSummary.java
-	@javac -d . ./src/cs455/overlay/wireformats/RegisterAcknowledgement.java
-	@javac -d . ./src/cs455/overlay/wireformats/StartMessagingSignal.java
-	@javac -d . ./src/cs455/overlay/wireformats/TransmitMessage.java
-	@javac -d . ./src/cs455/overlay/wireformats/SendListeningPort.java
-	@javac -d . ./src/cs455/overlay/wireformats/ForceExit.java
+	@javac -d . ./src/cs455/overlay/wireformats/SendMessagingNodesListEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/DefaultEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/RegisterRequestEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/DeregisterRequestEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/SendLinkWeightsEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/TaskInitiateEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/TaskCompleteEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/PullTrafficSummaryEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/TrafficSummaryEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/RegisterAcknowledgementEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/StartMessagingEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/TransmitMessageEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/SendListeningPortEvent.java
+	@javac -d . ./src/cs455/overlay/wireformats/ForceExitEvent.java
 	@javac -d . ./src/cs455/overlay/node/Node.java
 	@javac -d . ./src/cs455/overlay/wireformats/EventFactory.java
 	@javac -d . ./src/cs455/overlay/dijkstra/ConceptualNode.java

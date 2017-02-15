@@ -10,9 +10,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class PullTrafficSummary extends AbstractEvent {
+public class PullTrafficSummaryEvent extends AbstractEvent {
 
-    public PullTrafficSummary() {
+    public PullTrafficSummaryEvent() {
         super(EventType.PULL_TRAFFIC_SUMMARY.getValue());
     }
 
@@ -28,7 +28,7 @@ public class PullTrafficSummary extends AbstractEvent {
         return marshalledBytes;
     }
 
-    public PullTrafficSummary(byte[] marshalledBytes) throws IOException {
+    public PullTrafficSummaryEvent(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
         type = dataInputStream.readInt();

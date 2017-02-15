@@ -42,40 +42,40 @@ public class EventFactory {
         DataInputStream eventBytes = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
         final int eventTypeReceived = eventBytes.readInt();
         if(eventTypeReceived == EventType.REGISTER_REQUEST.getValue()) {
-            return new RegisterRequest(incomingBytes);
+            return new RegisterRequestEvent(incomingBytes);
         } else if (eventTypeReceived == EventType.REGISTER_RESPONSE.getValue()) {
             System.out.println("Node-Registered : Received Register Acknowledgement Event");
-            return new RegisterAcknowledgement(incomingBytes);
+            return new RegisterAcknowledgementEvent(incomingBytes);
         } else if (eventTypeReceived == EventType.DEREGISTER_REQUEST.getValue()) {
             System.out.println("Node-Deregister : Received De-register Acknowledgement Event");
-            return new DeregisterRequest(incomingBytes);
+            return new DeregisterRequestEvent(incomingBytes);
         } else if (eventTypeReceived == EventType.MESSAGING_NODES_LIST.getValue()) {
             System.out.println("Messaging-Node : Received the list of nodes to be connect");
-            return new MessagingNodesList(incomingBytes);
+            return new SendMessagingNodesListEvent(incomingBytes);
         } else if (eventTypeReceived == EventType.Link_Weights.getValue()) {
             System.out.println("Link Weights : Received Link weights.");
-            return new LinkWeights(incomingBytes);
+            return new SendLinkWeightsEvent(incomingBytes);
         } else if (eventTypeReceived == EventType.SIGNAL_TO_START_MSG.getValue()) {
             System.out.println("Starting to message");
-            return new StartMessagingSignal(incomingBytes);
+            return new StartMessagingEvent(incomingBytes);
         }else if (eventTypeReceived ==  EventType.TASK_INITIATE.getValue()) {
             System.out.println("Send the start Message");
-            return new TaskInitiate(incomingBytes);
+            return new TaskInitiateEvent(incomingBytes);
         } else if (eventTypeReceived ==  EventType.TASK_COMPLETE.getValue()) {
-                return new TaskComplete(incomingBytes);
+                return new TaskCompleteEvent(incomingBytes);
         } else if (eventTypeReceived ==  EventType.PULL_TRAFFIC_SUMMARY.getValue()) {
-            return new PullTrafficSummary(incomingBytes);
+            return new PullTrafficSummaryEvent(incomingBytes);
         } else if (eventTypeReceived ==  EventType.TRAFFIC_SUMMARY.getValue()) {
-            return new TrafficSummary(incomingBytes);
+            return new TrafficSummaryEvent(incomingBytes);
         } else if (eventTypeReceived ==  EventType.MESSAGE_TRANSMIT.getValue()) {
-            return new TransmitMessage(incomingBytes);
+            return new TransmitMessageEvent(incomingBytes);
         } else if (eventTypeReceived ==  EventType.SEND_LISTENING_PORT.getValue()) {
-            return new SendListeningPort(incomingBytes);
+            return new SendListeningPortEvent(incomingBytes);
         } else if (eventTypeReceived ==  EventType.FORCE_EXIT_EVERYONE.getValue()) {
-            return new ForceExit(incomingBytes);
+            return new ForceExitEvent(incomingBytes);
         } else {
             System.out.println("Message Received : Undefined - add proper handling  " + eventTypeReceived);
-            return new Default();
+            return new DefaultEvent();
         }
     }
 }

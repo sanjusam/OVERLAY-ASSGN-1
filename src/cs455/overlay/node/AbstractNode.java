@@ -51,30 +51,30 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
     public void onEvent(final Event event, final Socket socket) {
         final int eventTypeReceived = event.getType();
         if(event.getType() == EventType.REGISTER_REQUEST.getValue()) {
-            registerNode((RegisterRequest) event, socket);
+            registerNode((RegisterRequestEvent) event, socket);
         } else if(event.getType() == EventType.DEREGISTER_REQUEST.getValue()) {
-            deRegisterNode((DeregisterRequest) event, socket);
+            deRegisterNode((DeregisterRequestEvent) event, socket);
         } else if(eventTypeReceived == EventType.REGISTER_RESPONSE.getValue()) {
-            registerNodeAcknowledgement((RegisterAcknowledgement) event);
+            registerNodeAcknowledgement((RegisterAcknowledgementEvent) event);
         } else if (eventTypeReceived == EventType.MESSAGING_NODES_LIST.getValue()) {
-            makeConnectionsOnOverLayNodes((MessagingNodesList) event);
+            makeConnectionsOnOverLayNodes((SendMessagingNodesListEvent) event);
         } else if(eventTypeReceived == EventType.Link_Weights.getValue()) {
-            processLinkWeights((LinkWeights) event);
+            processLinkWeights((SendLinkWeightsEvent) event);
         } else if(eventTypeReceived == EventType.SIGNAL_TO_START_MSG.getValue()) {
-            initiateMessagingSignalForNodes(((TaskInitiate) event).getNumRoundsAsString());
+            initiateMessagingSignalForNodes(((TaskInitiateEvent) event).getNumRoundsAsString());
         }  else if(eventTypeReceived == EventType.TASK_INITIATE.getValue()) {
-            startMessaging(((TaskInitiate) event).getNumRoundsAsString());
+            startMessaging(((TaskInitiateEvent) event).getNumRoundsAsString());
         } else if(eventTypeReceived == EventType.TASK_COMPLETE.getValue()) {
-            final TaskComplete taskComplete = (TaskComplete) event;
-            acknowledgeTaskComplete(taskComplete.getNodeIpAddress(), taskComplete.getPortNum());
+            final TaskCompleteEvent taskCompleteEvent = (TaskCompleteEvent) event;
+            acknowledgeTaskComplete(taskCompleteEvent.getNodeIpAddress(), taskCompleteEvent.getPortNum());
         } else if (eventTypeReceived == EventType.PULL_TRAFFIC_SUMMARY.getValue()) {
             pullTrafficSummary();
         } else if (eventTypeReceived == EventType.TRAFFIC_SUMMARY.getValue()) {
-            printTrafficSummary((TrafficSummary) event);
+            printTrafficSummary((TrafficSummaryEvent) event);
         } else if(eventTypeReceived == EventType.MESSAGE_TRANSMIT.getValue()) {
-            processReceivedMessage((TransmitMessage) event);
+            processReceivedMessage((TransmitMessageEvent) event);
         } else if(eventTypeReceived == EventType.SEND_LISTENING_PORT.getValue()) {
-            updateConnectionInfo((SendListeningPort) event, socket);
+            updateConnectionInfo((SendListeningPortEvent) event, socket);
         } else if(eventTypeReceived == EventType.FORCE_EXIT_EVERYONE.getValue()) {
             forceExit();
         }
