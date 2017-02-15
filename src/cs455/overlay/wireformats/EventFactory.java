@@ -74,7 +74,7 @@ public class EventFactory {
         } else if (eventTypeReceived ==  EventType.FORCE_EXIT_EVERYONE.getValue()) {
             return new ForceExit(incomingBytes);
         } else {
-            System.out.println("Message Received : Undefined - add proper handling ");
+            System.out.println("Message Received : Undefined - add proper handling  " + eventTypeReceived);
             return new Default();
         }
     }

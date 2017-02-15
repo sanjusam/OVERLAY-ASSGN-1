@@ -198,9 +198,6 @@ public class MessagingNode extends AbstractNode {
         if(numOfMessagesReceived < potentialNumPacketsSend  && pullSummaryRequestReceived) {
             System.out.println("WARNING !!!! : Pull Traffic Summary Request received before all the packets are received " + numOfMessagesReceived +"/" + potentialNumPacketsSend );
         }
-        if(numOfMessagesReceived == potentialNumPacketsSend) {
-            System.out.println("DEBUG : All packets received");
-        }
     }
 
     @Override

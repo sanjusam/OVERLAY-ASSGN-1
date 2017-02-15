@@ -27,6 +27,7 @@ public class Registry extends AbstractNode implements Node {
     private long sumAllMessagesSent = 0 ;
     private long sumAllMessagesReceived = 0;
     private boolean printOnce = false;
+    public static Object LOCK_REGISTRY = new Object();
 
 
     public static void main(String args[]) throws Exception {
@@ -171,8 +172,10 @@ public class Registry extends AbstractNode implements Node {
     }
 
     @Override
-    public synchronized void acknowledgeTaskComplete(final String node, final int port) {
-        ++taskCompleted;
+    public void acknowledgeTaskComplete(final String node, final int port) {
+        synchronized (LOCK_REGISTRY) {
+            ++taskCompleted;
+        }
 
         if(taskCompleted == nodeDetailsList.size()) {
             System.out.println("INFO :: Received task complete from all nodes. - Pulling Traffic summary in 15 seconds");
