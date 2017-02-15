@@ -22,7 +22,7 @@ public class EventFactory {
         return INSTANCE;
     }
 
-    public synchronized void processReceivedEvent(final byte[] receivedStream, final Socket socket) {
+    public void processReceivedEvent(final byte[] receivedStream, final Socket socket) {
         try {
             final Event event = generateEventFromBytes(receivedStream);
             processEvent(event, socket);
