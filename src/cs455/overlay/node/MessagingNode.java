@@ -145,7 +145,6 @@ public class MessagingNode extends AbstractNode {
         }
 
         final List<String > listOfNodes  = extractLinkWeights.getAllNodesExceptMe() ;
-        //routingCacheList
         potentialNumPacketsSend  = numOfMessagesSend * MessageConstants.MAX_MESSAGES_PER_ROUND ;
         final int numRounds = Integer.parseInt(numRoundsStr);
         System.out.println("Messaging Starts");
