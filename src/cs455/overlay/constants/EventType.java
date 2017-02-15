@@ -3,7 +3,7 @@ package cs455.overlay.constants;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum EventType {
+public enum EventType {  /*All type of events that are supported*/
     DEFAULT (0, "default", "default"),
     REGISTER_REQUEST(1,"request-register", "reg-reg"),
     REGISTER_RESPONSE (2,"response","res"),

@@ -8,7 +8,7 @@ public class RoutingCache {
     private  String path ="";
     private  String nextHop ="";
 
-    RoutingCache(final String source, final String destination) {
+    RoutingCache(final String source, final String destination) {  //Holds the data for each path in context of a node.
         this.source = source;
         this.destination = destination;
     }

@@ -173,8 +173,6 @@ public abstract class AbstractNode implements Node, ConnectionObserver {
     private void addConnectionToPool(final String key, final TCPCommunicationHandler communicationHandler) {
         if(communicationHandlerMap.get(key) == null) {
             communicationHandlerMap.put(key, communicationHandler);
-        } else {
-            System.out.println("Connection Already exist, skip adding");
         }
     }
 

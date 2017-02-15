@@ -3,12 +3,10 @@ package cs455.overlay.dijkstra;
 import cs455.overlay.constants.MessageConstants;
 import cs455.overlay.utils.HelperUtils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-public class ExtractLinkWeights {
+public class ExtractLinkWeights {  /*Brigde between the messaging node and the Dijkstra calculation.  */
     private List<String> linkWeightList = new ArrayList<>();  // hostnameA:portnumA hostnameB:portnumB weight
     private final NodeToNameMapping nodeNameMapping = new NodeToNameMapping();
     private final List<RoutingCache> routingCacheList = new ArrayList<>();

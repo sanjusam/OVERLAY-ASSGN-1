@@ -1,6 +1,6 @@
 package cs455.overlay.dijkstra;
 
-public class ConceptualNode {
+public class ConceptualNode {  //Each messaging node is represented in numbers.  there is another class NodeToNameMapping, which holds the mapping.
     private int id;
     private int distance;
     private int parent;

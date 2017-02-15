@@ -39,7 +39,7 @@ public class NodeDetails {
 
     public int addConnections(final NodeDetails nodeDetails) {
         myConnections.add(nodeDetails);
-        nodeDetails.addRemoteConnections(this);
+        nodeDetails.addRemoteConnections(this);  //Add this nodes details to the remote connection of the connecting node.
         ++allConnections;  // Increment my connection count as well as the destination nodes connection count.
         nodeDetails.incrementConnectionCount();
         return myConnections.size();

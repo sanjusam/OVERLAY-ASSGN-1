@@ -3,7 +3,7 @@ package cs455.overlay.dijkstra;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NodeToNameMapping {
+public class NodeToNameMapping {  // Holds the mapping between the actual node and conceptual node which is used in the calculation.
     private int nodeNameInNumeric = 0;
 
     private  final Map<String, Integer> nodeDetailsMap = new HashMap<>();

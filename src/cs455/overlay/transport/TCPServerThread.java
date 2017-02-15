@@ -58,7 +58,7 @@ public class TCPServerThread implements ConnectionObservable, Runnable {
     }
 
     @Override
-    public void notifyListeners(final Socket socket) {
+    public void notifyListeners(final Socket socket) {  // Updates all listens that a new connection has come in
         for(final ConnectionObserver connectionObserver : incomingConnectionObserverList) {
             connectionObserver.update(socket);
         }
